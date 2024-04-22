@@ -1,0 +1,41 @@
+[package]
+name = "esp-demo"
+version = "0.1.0"
+authors = ["Michael"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+#hal = { package = "esp32s3-hal", version = "0.15.1", optional = true }
+esp-backtrace = { version = "0.11.1", features = [
+    "esp32s3",
+    "exception-handler",
+    "panic-handler",
+    "println",
+] }
+esp-hal = { version = "0.17.0", features = ["esp32s3", "embedded-hal"] }
+esp-println = { version = "0.9.1", features = ["esp32s3", "log"] }
+log = { version = "0.4.21" }
+
+display-interface = "0.5.0"
+display-interface-spi = "0.5.0"
+embedded-graphics = "0.8.1"
+embedded-hal = "1.0.0"
+embedded-hal-bus = "0.1.0"
+# mipidsi = 0.7.1 dependency embedded-hal = "0.2.7", use git for embedded-hal = "1.0.0"
+mipidsi ={git="https://github.com/almindor/mipidsi",branch = "master"}
+cst816s = "0.1.4"
+
+[profile.dev]
+# Rust debug is too slow. 
+# For debug builds always builds with some optimization
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1 # LLVM can perform better optimizations using a single thread
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false
