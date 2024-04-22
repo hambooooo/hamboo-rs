@@ -1,5 +1,5 @@
 [package]
-name = "esp-demo"
+name = "hambooo-rs"
 version = "0.1.0"
 authors = ["Michael"]
 edition = "2021"
@@ -23,8 +23,8 @@ embedded-graphics = "0.8.1"
 embedded-hal = "1.0.0"
 embedded-hal-bus = "0.1.0"
 # mipidsi = 0.7.1 dependency embedded-hal = "0.2.7", use git for embedded-hal = "1.0.0"
-mipidsi ={git="https://github.com/almindor/mipidsi",branch = "master"}
-cst816s = "0.1.4"
+mipidsi = { git = "https://github.com/almindor/mipidsi", branch = "master" }
+cst816s = { git = "https://github.com/thecodechemist99/cst816s.git", branch = "master" }
 
 [profile.dev]
 # Rust debug is too slow. 

@@ -2,6 +2,7 @@
 #![no_main]
 
 
+use cst816s::{CST816S, TouchEvent, TouchGesture};
 use display_interface_spi::SPIInterface;
 use embedded_graphics::{
     pixelcolor::Rgb565,
@@ -20,9 +21,18 @@ use esp_hal::{
     spi::{master::Spi, SpiMode},
     xtensa_lx::timer::delay,
 };
+use esp_hal::clock::CpuClock;
+use esp_hal::i2c::I2C;
 use mipidsi::{Builder, Display, options::ColorInversion};
 use mipidsi::models::ST7789;
 use mipidsi::options::ColorOrder;
+
+const SCREEN_HEIGHT: u16 = 240;
+
+const SCREEN_WIDTH: u16 = 280;
+
+const SWIPE_LENGTH: u32 = 20;
+const SWIPE_WIDTH: u32 = 2;
 
 #[entry]
 fn main() -> ! {
@@ -57,22 +67,40 @@ fn main() -> ! {
     let di = SPIInterface::new(spi_device, dc);
     let mut display = Builder::new(ST7789, di)
         .reset_pin(rst)
-        .display_size(240, 280)
+        .display_size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .display_offset(0, 20)
         .color_order(ColorOrder::Rgb)
         .init(&mut delay)
         .unwrap();
     log::info!("display init.");
 
+    let touch_int = io.pins.gpio9.into_pull_up_input();
+    let touch_rst = io.pins.gpio10.into_push_pull_output();
+    let touch_sda = io.pins.gpio11;
+    let touch_scl = io.pins.gpio12;
+
+
+    let i2c = I2C::new(peripherals.I2C1, touch_sda, touch_scl, 100u32.kHz(), &clocks, None);
+    let mut touchpad = CST816S::new(i2c, touch_int, touch_rst);
+    touchpad.setup(&mut delay).unwrap();
+
+    delay.delay(1.millis());
+
     // Make the display all black
     display.clear(Rgb565::WHITE).unwrap();
     // Draw a smiley face with white eyes and a red mouth
-    draw_smiley(&mut display).unwrap();
-    // demo(&mut display).unwrap();
+    // draw_smiley(&mut display).unwrap();
 
     loop {
         // log::info!("Hello world!");
         // delay.delay(500.millis());
+        if let Some(evt) = touchpad.read_one_touch_event(true) {
+            log::info!("{:?}",evt);
+
+            draw_marker(&mut display, &evt, Rgb565::RED);
+        } else {
+            delay.delay(1.millis());
+        }
     }
 }
 
@@ -107,10 +135,44 @@ fn draw_smiley<T: DrawTarget<Color=Rgb565>>(display: &mut T) -> Result<(), T::Er
     Ok(())
 }
 
-fn demo<T: DrawTarget<Color=Rgb565>>(display: &mut T) -> Result<(), T::Error> {
-    // Draw the left eye as a circle located at (50, 100), with a diameter of 40, filled with white
-    Circle::new(Point::new(0, 0), 40)
-        .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
-        .draw(display)?;
-    Ok(())
+/// Draw an indicator of the kind of gesture we detected
+fn draw_marker(display: &mut impl DrawTarget<Color=Rgb565>, event: &TouchEvent, color: Rgb565) {
+    let x_pos = event.x;
+    let y_pos = event.y;
+
+    match event.gesture {
+        TouchGesture::SlideLeft | TouchGesture::SlideRight => {
+            Rectangle::new(
+                Point::new(x_pos - SWIPE_LENGTH  as i32, y_pos - SWIPE_WIDTH  as i32),
+                Size::new(x_pos as u32 + SWIPE_LENGTH, y_pos  as u32 + SWIPE_WIDTH),
+            )
+                .into_styled(PrimitiveStyle::with_fill(color))
+                .draw(display)
+                .map_err(|_| ())
+                .unwrap();
+        }
+        TouchGesture::SlideUp | TouchGesture::SlideDown => {
+            Rectangle::new(
+                Point::new(x_pos - SWIPE_LENGTH  as i32, y_pos - SWIPE_WIDTH  as i32),
+                Size::new(x_pos as u32 + SWIPE_LENGTH, y_pos  as u32 + SWIPE_WIDTH),
+            )
+                .into_styled(PrimitiveStyle::with_fill(color))
+                .draw(display)
+                .map_err(|_| ())
+                .unwrap();
+        }
+        TouchGesture::SingleClick => Circle::new(Point::new(x_pos, y_pos), 20)
+            .into_styled(PrimitiveStyle::with_fill(color))
+            .draw(display)
+            .map_err(|_| ())
+            .unwrap(),
+        TouchGesture::LongPress => {
+            Circle::new(Point::new(x_pos, y_pos), 40)
+                .into_styled(PrimitiveStyle::with_stroke(color, 4))
+                .draw(display)
+                .map_err(|_| ())
+                .unwrap();
+        }
+        _ => {}
+    }
 }
