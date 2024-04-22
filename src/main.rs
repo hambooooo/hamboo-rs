@@ -9,6 +9,9 @@ use embedded_graphics::{
     prelude::*,
     primitives::{Circle, Primitive, PrimitiveStyle, Rectangle, Triangle},
 };
+use embedded_graphics::mono_font::ascii::FONT_8X13;
+use embedded_graphics::mono_font::MonoTextStyle;
+use embedded_graphics::text::Text;
 use embedded_hal_bus::spi::ExclusiveDevice;
 use esp_backtrace as _;
 use esp_hal::{
@@ -25,11 +28,11 @@ use esp_hal::clock::CpuClock;
 use esp_hal::i2c::I2C;
 use mipidsi::{Builder, Display, options::ColorInversion};
 use mipidsi::models::ST7789;
-use mipidsi::options::ColorOrder;
+use mipidsi::options::{ColorOrder, Orientation, Rotation};
 
-const SCREEN_HEIGHT: u16 = 240;
+const SCREEN_HEIGHT: u16 = 280;
 
-const SCREEN_WIDTH: u16 = 280;
+const SCREEN_WIDTH: u16 = 240;
 
 const SWIPE_LENGTH: u32 = 20;
 const SWIPE_WIDTH: u32 = 2;
@@ -57,7 +60,7 @@ fn main() -> ! {
     let mut spi = Spi::new(
         peripherals.SPI3,
         40u32.MHz(),
-        SpiMode::Mode0,
+        SpiMode::Mode3,
         &clocks,
     );
     let spi = spi.with_sck(clk).with_mosi(mosi);
@@ -67,9 +70,11 @@ fn main() -> ! {
     let di = SPIInterface::new(spi_device, dc);
     let mut display = Builder::new(ST7789, di)
         .reset_pin(rst)
+        // .orientation(Orientation::new().rotate(Rotation::Deg90))
         .display_size(SCREEN_WIDTH, SCREEN_HEIGHT)
         .display_offset(0, 20)
         .color_order(ColorOrder::Rgb)
+        .invert_colors(ColorInversion::Inverted)
         .init(&mut delay)
         .unwrap();
     log::info!("display init.");
@@ -80,55 +85,92 @@ fn main() -> ! {
     let touch_scl = io.pins.gpio12;
 
 
-    let i2c = I2C::new(peripherals.I2C1, touch_sda, touch_scl, 100u32.kHz(), &clocks, None);
+    let i2c = I2C::new(peripherals.I2C0, touch_sda, touch_scl, 100u32.kHz(), &clocks, None);
     let mut touchpad = CST816S::new(i2c, touch_int, touch_rst);
     touchpad.setup(&mut delay).unwrap();
 
     delay.delay(1.millis());
 
     // Make the display all black
-    display.clear(Rgb565::WHITE).unwrap();
+    // display.clear(Rgb565::BLACK).unwrap();
     // Draw a smiley face with white eyes and a red mouth
     // draw_smiley(&mut display).unwrap();
+    // draw_hello_world(&mut display).unwrap();
 
     loop {
-        // log::info!("Hello world!");
-        // delay.delay(500.millis());
-        if let Some(evt) = touchpad.read_one_touch_event(true) {
-            log::info!("{:?}",evt);
-
-            draw_marker(&mut display, &evt, Rgb565::RED);
-        } else {
-            delay.delay(1.millis());
-        }
+        draw_hello_world(&mut display);
+        delay.delay(2.secs());
+        draw_smiley(&mut display);
+        delay.delay(2.secs());
+        // if let Some(evt) = touchpad.read_one_touch_event(false) {
+        //     log::info!("{:?}",evt);
+        //
+        //     draw_marker(&mut display, &evt, Rgb565::RED);
+        // } else {
+        //     delay.delay(1.millis());
+        // }
     }
 }
 
+fn draw_hello_world<T: DrawTarget<Color=Rgb565>>(display: &mut T) -> Result<(), T::Error> {
+    display.clear(Rgb565::BLACK)?;
+    Rectangle::new(Point::new(0, 0), Size::new(240, 280))
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::CSS_DARK_GRAY))
+        .draw(display)?;
+    Rectangle::new(Point::new(5, 5), Size::new(230, 270))
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::BLACK))
+        .draw(display)?;
+
+    Circle::new(Point::new(0, 0), 80)
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
+        .draw(display)?;
+
+    Circle::new(Point::new(160, 0), 80)
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
+        .draw(display)?;
+    Circle::new(Point::new(160, 200), 80)
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
+        .draw(display)?;
+
+    Circle::new(Point::new(0, 200), 80)
+        .into_styled(PrimitiveStyle::with_fill(Rgb565::YELLOW))
+        .draw(display)?;
+
+    Text::new(
+        "Hello World!",
+        Point::new(80, 140),
+        MonoTextStyle::new(&FONT_8X13, RgbColor::WHITE),
+    )
+        .draw(display)?;
+    Ok(())
+}
+
 fn draw_smiley<T: DrawTarget<Color=Rgb565>>(display: &mut T) -> Result<(), T::Error> {
+    display.clear(Rgb565::BLACK)?;
     // Draw the left eye as a circle located at (50, 100), with a diameter of 40, filled with white
-    Circle::new(Point::new(50, 100), 40)
+    Circle::new(Point::new(50, 80), 40)
         .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
         .draw(display)?;
 
     // Draw the right eye as a circle located at (50, 200), with a diameter of 40, filled with white
-    Circle::new(Point::new(50, 200), 40)
+    Circle::new(Point::new(50, 180), 40)
         .into_styled(PrimitiveStyle::with_fill(Rgb565::WHITE))
         .draw(display)?;
 
     // Draw an upside down red triangle to represent a smiling mouth
     Triangle::new(
-        Point::new(130, 140),
-        Point::new(130, 200),
-        Point::new(160, 170),
+        Point::new(130, 120),
+        Point::new(130, 180),
+        Point::new(160, 150),
     )
         .into_styled(PrimitiveStyle::with_fill(Rgb565::RED))
         .draw(display)?;
 
     // Cover the top part of the mouth with a black triangle so it looks closed instead of open
     Triangle::new(
-        Point::new(130, 150),
-        Point::new(130, 190),
-        Point::new(150, 170),
+        Point::new(130, 130),
+        Point::new(130, 170),
+        Point::new(150, 150),
     )
         .into_styled(PrimitiveStyle::with_fill(Rgb565::BLACK))
         .draw(display)?;
