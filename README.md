@@ -2,14 +2,18 @@
   <img width="420" height="320" src="docs/Hamboo.jpg">
 </p>
 
-![dis5k-v1-sailship](docs/watch.jpg)
+<img alt="Hamboo" src="docs/watch.jpg"/>
 
-<br> 
+<br>
 
 # Hamboo - Smartwatch based on Esp32-S3 chip.
+
 <img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"/>
 <img alt="esp-hal" src="https://img.shields.io/badge/Esp_hal-0.17.0-green.svg"/>
 <img alt="Slint" src="https://img.shields.io/badge/Slint-1.5.1-green.svg"/>
+
+---
+
 
 > Main Chip：Esp32-s3 (wifi & bluetooth)
 >
@@ -61,7 +65,7 @@ cargo run --features=simulator --release
 
 ## 🛠️ Planning
 - [X] Display
-- [ ] Touch
+- [X] Touch
 - [ ] Other drivers
 - [ ] Dial plate
 - [ ] Games
