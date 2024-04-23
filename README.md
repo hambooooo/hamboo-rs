@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="420" height="320" src="docs/hamboo.jpg">
+  <img width="420" height="320" src="docs/Hamboo.jpg">
 </p>
 
 ![dis5k-v1-sailship](docs/watch.jpg)
@@ -28,9 +28,11 @@
 
 ### 🧱 Circuit diagram & PCB
 
-<img width="420" height="320" src="docs/schematic.png">
-<img width="400" height="320" src="docs/PCB.png">
-<img width="450" height="320" src="docs/PCB3D.png">
+<div>
+<img width="35%" height="200" src="docs/schematic.png"/>
+<img width="30%" height="200" src="docs/PCB.png"/>
+<img width="30%" height="200" src="docs/PCB3D.png"/>
+</div>
 
 ## 📘 Cost
 
