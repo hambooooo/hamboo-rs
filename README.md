@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="420" height="320" src="docs/Hamboo.jpg">
+  <img width="210" height="90" src="docs/Hamboo.jpg">
 </p>
 
 <img alt="Hamboo" src="docs/watch.jpg"/>
