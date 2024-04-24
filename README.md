@@ -13,19 +13,13 @@
 
 # Hamboo - Smartwatch based on Esp32-S3 chip.
 
-
-
 ---
 
-
-> Main Chip：Esp32-s3 (wifi & bluetooth)
->
-> Hardware: Touch screen, microphone, speaker, gyroscope, wireless charging, external RTC, pressure sensor, SDMMC
->
-> Software planning: OTA, dial, music player, sports record, games, NFC access bus card, Bluetooth dial, alarm clock, stopwatch, timer...
+> **Main Chip**：Esp32-s3 (wifi & bluetooth) <br>
+> **Hardware**: Touch screen, microphone, speaker, gyroscope, wireless charging, external RTC, pressure sensor, SDMMC <br>
+> **Software Planning**: OTA, dial, music player, sports record, games, NFC access bus card, Bluetooth dial, alarm clock, stopwatch, timer... <br>
 
 ## Design
-
 
 ### 📦 Blender modeling and 3d printing
 
@@ -45,7 +39,7 @@
 
 ## 📘 Cost & Peripheral
 
-- **pcb**: ￥0  （4-layer board free play [lceda](https://lceda.cn/)）
+- **pcb**: ￥0 （4-layer board free play [lceda](https://lceda.cn/)）
 - **3d printing**: ￥20 （White resin material）
 - **bom**: ¥? (calculating...)
 - **screen**: ￥30 （P169H002-CTP 1.69inch）
@@ -82,11 +76,13 @@ cargo run --features=simulator --release
 ```
 
 ### 🛠️ Planning
+
 - [X] Display
 - [X] Touch
+- [ ] Slint
 - [ ] Other drivers
 - [ ] OTA
-- [ ] Dial plate
+- [ ] Watch dial
 - [ ] Games
 - [ ] NFT support
 
