@@ -47,7 +47,7 @@
 
 - **pcb**: ￥0  （4-layer board free play [lceda](https://lceda.cn/)）
 - **3d printing**: ￥20 （White resin material）
-- **bom**: calculating...
+- **bom**: ¥? (calculating...)
 - **screen**: ￥30 （P169H002-CTP 1.69inch）
 - **battery**: ￥7 (size: 302530, 3.7v 250mAh)
 - **watchband**: ￥13 (for apple watch(7/8/9))
