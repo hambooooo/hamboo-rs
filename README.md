@@ -11,7 +11,7 @@
 
 <br>
 
-# Hamboo - Smartwatch based on Esp32-S3 chip.
+# Hamboo - ⌚Smartwatch based on Esp32-S3 chip.
 
 ---
 
@@ -21,13 +21,13 @@
 
 ## Design
 
-### 📦 Blender modeling and 3d printing
+### 📐 Blender modeling and 3d printing
 
 ![blender.jpg](docs%2Fblender.jpg)
 
 [Hamboo-V4.blend](docs%2FHamboo-V4.blend)
 
-### 🧱 Circuit diagram & PCB
+### 🖥️ Circuit diagram & PCB
 
 <div>
 <img width="30%" height="200" src="docs/circuit-diagram.png"/>
@@ -37,7 +37,7 @@
 
 [hamboo-pcb.zip](docs%2Fhamboo-pcb.zip)
 
-## 📘 Cost & Peripheral
+## 💰 Cost & 🎧Peripheral
 
 - **pcb**: ￥0 （4-layer board free play [lceda](https://lceda.cn/)）
 - **3d printing**: ￥20 （White resin material）
@@ -57,9 +57,9 @@
     <img height="100" src="docs/3dmodel.jpg"/>
 </div>
 
-## hamboo-rs
+## ⌨️ hamboo-rs
 
-### ⌨️ Getting Start
+### 🎬 Getting Start
 
 ```bash
 # Setting environment
@@ -75,7 +75,7 @@ cargo run --release
 cargo run --features=simulator --release
 ```
 
-### 🛠️ Planning
+### 📋 Planning
 
 - [X] Display
 - [X] Touch
@@ -83,10 +83,10 @@ cargo run --features=simulator --release
 - [ ] Other drivers
 - [ ] OTA
 - [ ] Watch dial
-- [ ] Games
+- [ ] 🎮 Games
 - [ ] NFT support
 
-### License
+### 📄 License
 
 [MIT](https://opensource.org/licenses/MIT)
 
