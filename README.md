@@ -53,6 +53,16 @@
 - **watchband**: ￥13 (for apple watch(7/8/9))
 - **others**: ￥30 (speaker size: 1506、motor size: 3610、wireless charging coil: 3021 12.5uH)
 
+<div>
+    <img height="100" src="docs/screen.jpg"/>
+    <img height="100" src="docs/motor.jpg"/>
+    <img height="100" src="docs/speaker.jpg"/>
+    <img height="100" src="docs/coil.png"/>
+    <img height="100" src="docs/battery.jpg"/>
+    <img height="100" src="docs/watchband.jpg"/>
+    <img height="100" src="docs/3dmodel.jpg"/>
+</div>
+
 ## hamboo-rs
 
 ### ⌨️ Getting Start
