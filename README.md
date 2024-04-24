@@ -36,7 +36,7 @@
 ### 🧱 Circuit diagram & PCB
 
 <div>
-<img width="35%" height="200" src="docs/schematic.png"/>
+<img width="30%" height="200" src="docs/circuit-diagram.png"/>
 <img width="30%" height="200" src="docs/PCB.png"/>
 <img width="30%" height="200" src="docs/PCB3D.png"/>
 </div>
