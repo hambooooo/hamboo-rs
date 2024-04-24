@@ -41,6 +41,8 @@
 <img width="30%" height="200" src="docs/PCB3D.png"/>
 </div>
 
+[hamboo-pcb.zip](docs%2Fhamboo-pcb.zip)
+
 ## 📘 Cost
 
 - **pcb**: ￥0 
