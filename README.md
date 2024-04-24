@@ -43,15 +43,17 @@
 
 [hamboo-pcb.zip](docs%2Fhamboo-pcb.zip)
 
-## 📘 Cost
+## 📘 Cost & Peripheral
 
-- **pcb**: ￥0 
-- **3d printing**: ￥20
+- **pcb**: ￥0  （4-layer board free play [lceda](https://lceda.cn/)）
+- **3d printing**: ￥20 （White resin material）
 - **bom**: calculating...
-- **screen**: ￥30
-- **battery**: ￥7
-- **watchband**: ￥13
-- **others**: ￥30
+- **screen**: ￥30 （P169H002-CTP 1.69inch）
+- **battery**: ￥7 (size: 302530, 3.7v 250mAh)
+- **watchband**: ￥13 (for apple watch(7/8/9))
+- **others**: ￥30 (speaker size: 1506、motor size: 3610、wireless charging coil: 3021 12.5uH)
+
+## hamboo-rs
 
 ### ⌨️ Getting Start
 
@@ -69,7 +71,7 @@ cargo run --release
 cargo run --features=simulator --release
 ```
 
-## 🛠️ Planning
+### 🛠️ Planning
 - [X] Display
 - [X] Touch
 - [ ] Other drivers
@@ -78,7 +80,7 @@ cargo run --features=simulator --release
 - [ ] Games
 - [ ] NFT support
 
-## License
+### License
 
 [MIT](https://opensource.org/licenses/MIT)
 
