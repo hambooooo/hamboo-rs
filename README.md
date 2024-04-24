@@ -1,6 +1,11 @@
 <p align="center">
   <img width="210" height="90" src="docs/Hamboo.jpg">
 </p>
+<p align="center">
+    <img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+    <img alt="esp-hal" src="https://img.shields.io/badge/esp_hal-0.17.0-green.svg"/>
+    <img alt="Slint" src="https://img.shields.io/badge/slint-1.5.1-green.svg"/>
+</p>
 
 <img alt="Hamboo" src="docs/watch.jpg"/>
 
@@ -8,9 +13,7 @@
 
 # Hamboo - Smartwatch based on Esp32-S3 chip.
 
-<img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"/>
-<img alt="esp-hal" src="https://img.shields.io/badge/Esp_hal-0.17.0-green.svg"/>
-<img alt="Slint" src="https://img.shields.io/badge/Slint-1.5.1-green.svg"/>
+
 
 ---
 
@@ -48,12 +51,13 @@
 - **watchband**: ￥13
 - **others**: ￥30
 
-### ⌨️ Hamboo-rs getting start
+### ⌨️ Getting Start
 
 ```bash
-# Environment setup
+# Setting environment
 cargo install espup
 espup install
+# To uninstall
 # espup uninstall
 export . ~/export-esp.sh
 # Firmware 
@@ -67,6 +71,13 @@ cargo run --features=simulator --release
 - [X] Display
 - [X] Touch
 - [ ] Other drivers
+- [ ] OTA
 - [ ] Dial plate
 - [ ] Games
 - [ ] NFT support
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
+
+Copyright (c) 2014-present, Michael
