@@ -1,39 +1,73 @@
 #![no_std]
-#![no_main]
+#![cfg_attr(not(feature = "simulator"), no_main)]
 
+extern crate alloc;
 
-use cst816s::{CST816S, TouchEvent};
-use display_interface_spi::SPIInterface;
-use embedded_graphics::{
-    pixelcolor::Rgb565,
-    prelude::*,
-    primitives::{Circle, Primitive, PrimitiveStyle, Rectangle},
+#[cfg(not(feature = "simulator"))]
+use {
+    cst816s::{CST816S, TouchEvent},
+    display_interface_spi::SPIInterface,
+    embedded_graphics::{
+        pixelcolor::Rgb565,
+        prelude::*,
+        primitives::{Circle, Primitive, PrimitiveStyle, Rectangle},
+    },
+    embedded_graphics::{
+        mono_font::{ascii::FONT_10X20, MonoTextStyle},
+        text::Text,
+    },
+    embedded_hal_bus::spi::ExclusiveDevice,
+    esp_backtrace as _,
+    esp_hal::{
+        clock::ClockControl,
+        delay::Delay,
+        gpio::IO,
+        i2c::I2C,
+        peripherals::Peripherals,
+        prelude::*,
+        spi::{master::Spi, SpiMode},
+    },
+    mipidsi::{
+        {Builder, options::ColorInversion},
+        models::ST7789,
+        options::ColorOrder,
+    },
 };
-use embedded_graphics::mono_font::ascii::FONT_10X20;
-use embedded_graphics::mono_font::MonoTextStyle;
-use embedded_graphics::text::Text;
-use embedded_hal_bus::spi::ExclusiveDevice;
-use esp_backtrace as _;
-use esp_hal::{
-    clock::ClockControl,
-    delay::Delay,
-    gpio::IO,
-    i2c::I2C,
-    peripherals::Peripherals,
-    prelude::*,
-    spi::{master::Spi, SpiMode},
-};
-use mipidsi::{
-    {Builder, options::ColorInversion},
-    models::ST7789,
-    options::ColorOrder,
-};
 
-const SCREEN_HEIGHT: u16 = 280;
-const SCREEN_WIDTH: u16 = 240;
+slint::include_modules!();
 
+fn create_slint_app() -> AppWindow {
+    let ui = AppWindow::new().expect("Failed to load UI");
+
+    let ui_handle = ui.as_weak();
+    ui.on_request_increase_value(move || {
+        let ui = ui_handle.unwrap();
+        ui.set_counter(ui.get_counter() + 1);
+    });
+    ui
+}
+
+#[cfg(feature = "simulator")]
+fn main() -> Result<(), slint::PlatformError> {
+    create_slint_app().run()
+}
+
+#[global_allocator]
+static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
+
+#[cfg(not(feature = "simulator"))]
+fn init_heap() {
+    const HEAP_SIZE: usize = 250 * 1024;
+    static mut HEAP: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
+    unsafe { ALLOCATOR.init(&mut HEAP as *mut u8, core::mem::size_of_val(&HEAP)) }
+    // slint::platform::set_platform(Box::new(EspBackend::default()))
+    //     .expect("backend already initialized");
+}
+
+#[cfg(not(feature = "simulator"))]
 #[entry]
 fn main() -> ! {
+    init_heap();
     let peripherals = Peripherals::take();
     let system = peripherals.SYSTEM.split();
     let clocks = ClockControl::max(system.clock_control).freeze();
@@ -63,7 +97,7 @@ fn main() -> ! {
     let di = SPIInterface::new(spi_device, dc);
     let mut display = Builder::new(ST7789, di)
         .reset_pin(rst)
-        .display_size(SCREEN_WIDTH, SCREEN_HEIGHT)
+        .display_size(240, 280)
         .display_offset(0, 20)
         .color_order(ColorOrder::Rgb)
         .invert_colors(ColorInversion::Inverted)
@@ -80,7 +114,8 @@ fn main() -> ! {
     let mut touch = CST816S::new(i2c, touch_int, touch_rst);
     touch.setup(&mut delay).unwrap();
 
-    delay.delay(1.millis());
+    // let _ui = create_slint_app();
+
     draw_hello_world(&mut display).unwrap();
 
     loop {
@@ -94,6 +129,7 @@ fn main() -> ! {
     }
 }
 
+#[cfg(not(feature = "simulator"))]
 fn draw_hello_world<T: DrawTarget<Color=Rgb565>>(display: &mut T) -> Result<(), T::Error> {
     display.clear(Rgb565::BLACK)?;
     Rectangle::new(Point::new(0, 0), Size::new(240, 280))
@@ -127,6 +163,7 @@ fn draw_hello_world<T: DrawTarget<Color=Rgb565>>(display: &mut T) -> Result<(), 
     Ok(())
 }
 
+#[cfg(not(feature = "simulator"))]
 /// Draw an indicator of the kind of gesture we detected
 fn draw_marker(display: &mut impl DrawTarget<Color=Rgb565>, event: &TouchEvent, color: Rgb565) {
     let x_pos = event.x;

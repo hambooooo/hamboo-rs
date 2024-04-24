@@ -2,7 +2,8 @@
   <img width="210" height="90" src="docs/Hamboo.jpg">
 </p>
 <p align="center">
-    <img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+    <img alt="License-MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+    <img alt="License-Apache" src="https://img.shields.io/badge/license-apache-blue.svg"/>
     <img alt="esp-hal" src="https://img.shields.io/badge/esp_hal-0.17.0-green.svg"/>
     <img alt="Slint" src="https://img.shields.io/badge/slint-1.5.1-green.svg"/>
 </p>
@@ -88,6 +89,6 @@ cargo run --features=simulator --release
 
 ### 📄 License
 
-[MIT](https://opensource.org/licenses/MIT)
+[MIT](https://opensource.org/licenses/MIT) &nbsp; [APACHE](https://opensource.org/license/apache-2-0)
 
 Copyright (c) 2014-present, Michael
