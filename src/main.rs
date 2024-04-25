@@ -16,22 +16,30 @@ use {
         mono_font::{ascii::FONT_10X20, MonoTextStyle},
         text::Text,
     },
+    embedded_hal::digital::OutputPin,
     embedded_hal_bus::spi::ExclusiveDevice,
+    esp_alloc::EspHeap,
     esp_backtrace as _,
     esp_hal::{
         clock::ClockControl,
         delay::Delay,
         gpio::IO,
         i2c::I2C,
+        peripherals,
         peripherals::Peripherals,
         prelude::*,
         spi::{master::Spi, SpiMode},
+        systimer::SystemTimer,
+        timer::TimerGroup,
+        rtc_cntl::Rtc,
     },
     mipidsi::{
         {Builder, options::ColorInversion},
+        Display,
         models::ST7789,
         options::ColorOrder,
     },
+    slint::platform::WindowEvent,
 };
 
 slint::include_modules!();
@@ -53,27 +61,35 @@ fn main() -> Result<(), slint::PlatformError> {
 }
 
 #[cfg(not(feature = "simulator"))]
-#[global_allocator]
-static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
-
-#[cfg(not(feature = "simulator"))]
-fn init_heap() {
-    const HEAP_SIZE: usize = 250 * 1024;
-    static mut HEAP: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
-    unsafe { ALLOCATOR.init(&mut HEAP as *mut u8, core::mem::size_of_val(&HEAP)) }
-    // slint::platform::set_platform(Box::new(EspBackend::default()))
-    //     .expect("backend already initialized");
-}
-
-#[cfg(not(feature = "simulator"))]
 #[entry]
 fn main() -> ! {
-    init_heap();
+    // HEAP configuration
+    const HEAP_SIZE: usize = 250 * 1024;
+    static mut HEAP: [u8; HEAP_SIZE] = [0; HEAP_SIZE];
+    #[global_allocator]
+    static ALLOCATOR: EspHeap = EspHeap::empty();
+    unsafe { ALLOCATOR.init(&mut HEAP as *mut u8, core::mem::size_of_val(&HEAP)) }
+
     let peripherals = Peripherals::take();
     let system = peripherals.SYSTEM.split();
     let clocks = ClockControl::max(system.clock_control).freeze();
     let mut delay = Delay::new(&clocks);
     esp_println::logger::init_logger_from_env();
+
+    let mut rtc = Rtc::new(peripherals.LPWR, None);
+
+    // Create timer groups
+    let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks, None);
+    // Get watchdog timers of timer groups
+    let mut wdt0 = timer_group0.wdt;
+    let timer_group1 = TimerGroup::new(peripherals.TIMG1, &clocks, None);
+    let mut wdt1 = timer_group1.wdt;
+
+    // Disable watchdog timers
+    rtc.swd.disable();
+    rtc.rwdt.disable();
+    wdt0.disable();
+    wdt1.disable();
 
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
     let cs = io.pins.gpio16.into_push_pull_output();
@@ -115,64 +131,120 @@ fn main() -> ! {
     let mut touch = CST816S::new(i2c, touch_int, touch_rst);
     touch.setup(&mut delay).unwrap();
 
-    // let _ui = create_slint_app();
+    // Configure platform for Slint
+    let window = slint::platform::software_renderer::MinimalSoftwareWindow::new(Default::default());
 
-    draw_hello_world(&mut display).unwrap();
+    slint::platform::set_platform(alloc::boxed::Box::new(SlintPlatform {
+        window: window.clone(),
+    }))
+        .unwrap();
+
+    struct SlintPlatform {
+        window: alloc::rc::Rc<slint::platform::software_renderer::MinimalSoftwareWindow>,
+    }
+
+    impl slint::platform::Platform for SlintPlatform {
+        fn create_window_adapter(
+            &self,
+        ) -> Result<alloc::rc::Rc<dyn slint::platform::WindowAdapter>, slint::PlatformError>
+        {
+            Ok(self.window.clone())
+        }
+
+        fn duration_since_start(&self) -> core::time::Duration {
+            core::time::Duration::from_millis(
+                SystemTimer::now() / (SystemTimer::TICKS_PER_SECOND / 1000),
+            )
+        }
+
+        fn debug_log(&self, arguments: core::fmt::Arguments) {
+            esp_println::println!("{}", arguments);
+        }
+    }
+
+    let mut buffer_provider = DrawBuffer {
+        display,
+        buffer: &mut [slint::platform::software_renderer::Rgb565Pixel(0); 240],
+    };
+
+    let _ui = create_slint_app();
+
+    let mut last_touch_action = None;
+    let mut last_touch_position = None;
 
     loop {
-        if let Some(evt) = touch.read_one_touch_event(true) {
-            // log::info!("{:?}",evt);
+        slint::platform::update_timers_and_animations();
+        window.draw_if_needed(|renderer| {
+            renderer.render_by_line(&mut buffer_provider);
+        });
 
-            draw_marker(&mut display, &evt, Rgb565::RED);
-        } else {
-            delay.delay(1.millis());
+        // TODO: Fix issue with short click. In this case only one interrupt is received and Pointer stays pressed.
+        let button = slint::platform::PointerEventButton::Left;
+        if let Some(event) = touch.read_one_touch_event(true).map(|record| {
+            let position = slint::PhysicalPosition::new(record.x as _, record.y as _)
+                .to_logical(window.scale_factor());
+            esp_println::println!("{:?}", record);
+            last_touch_position.replace(position);
+            last_touch_action.replace(record.action);
+            match record.action {
+                0 => WindowEvent::PointerPressed { position, button },
+                1 => WindowEvent::PointerReleased { position, button },
+                2 => WindowEvent::PointerMoved { position },
+                _ => WindowEvent::PointerExited,
+            }
+        }) {
+            esp_println::println!("{:?}", event);
+            let is_pointer_release_event: bool =
+                matches!(event, WindowEvent::PointerReleased { .. });
+            window.dispatch_event(event);
+
+            // removes hover state on widgets
+            if is_pointer_release_event {
+                window.dispatch_event(WindowEvent::PointerExited);
+            }
+        }
+
+        if window.has_active_animations() {
+            continue;
         }
     }
 }
-
 #[cfg(not(feature = "simulator"))]
-fn draw_hello_world<T: DrawTarget<Color=Rgb565>>(display: &mut T) -> Result<(), T::Error> {
-    display.clear(Rgb565::BLACK)?;
-    Rectangle::new(Point::new(0, 0), Size::new(240, 280))
-        .into_styled(PrimitiveStyle::with_fill(Rgb565::CSS_DARK_GRAY))
-        .draw(display)?;
-    Rectangle::new(Point::new(5, 5), Size::new(230, 270))
-        .into_styled(PrimitiveStyle::with_fill(Rgb565::BLACK))
-        .draw(display)?;
-
-    Circle::new(Point::new(0, 0), 80)
-        .into_styled(PrimitiveStyle::with_fill(Rgb565::GREEN))
-        .draw(display)?;
-
-    Circle::new(Point::new(160, 0), 80)
-        .into_styled(PrimitiveStyle::with_fill(Rgb565::CSS_GOLD))
-        .draw(display)?;
-    Circle::new(Point::new(160, 200), 80)
-        .into_styled(PrimitiveStyle::with_fill(Rgb565::BLUE))
-        .draw(display)?;
-
-    Circle::new(Point::new(0, 200), 80)
-        .into_styled(PrimitiveStyle::with_fill(Rgb565::YELLOW))
-        .draw(display)?;
-
-    Text::new(
-        "Hello World!",
-        Point::new(70, 140),
-        MonoTextStyle::new(&FONT_10X20, RgbColor::WHITE),
-    )
-        .draw(display)?;
-    Ok(())
+struct DrawBuffer<'a, Display> {
+    display: Display,
+    buffer: &'a mut [slint::platform::software_renderer::Rgb565Pixel],
 }
 
 #[cfg(not(feature = "simulator"))]
-/// Draw an indicator of the kind of gesture we detected
-fn draw_marker(display: &mut impl DrawTarget<Color=Rgb565>, event: &TouchEvent, color: Rgb565) {
-    let x_pos = event.x;
-    let y_pos = event.y;
+impl<
+    DI: display_interface::WriteOnlyDataCommand,
+    RST: OutputPin<Error = core::convert::Infallible>,
+> slint::platform::software_renderer::LineBufferProvider
+for &mut DrawBuffer<'_, Display<DI, ST7789, RST>>
+{
+    type TargetPixel = slint::platform::software_renderer::Rgb565Pixel;
 
-    Circle::new(Point::new(x_pos, y_pos), 5)
-        .into_styled(PrimitiveStyle::with_fill(color))
-        .draw(display)
-        .map_err(|_| ())
-        .unwrap();
+    fn process_line(
+        &mut self,
+        line: usize,
+        range: core::ops::Range<usize>,
+        render_fn: impl FnOnce(&mut [slint::platform::software_renderer::Rgb565Pixel]),
+    ) {
+        let buffer = &mut self.buffer[range.clone()];
+
+        render_fn(buffer);
+
+        // We send empty data just to get the device in the right window
+        self.display
+            .set_pixels(
+                range.start as u16,
+                line as _,
+                range.end as u16,
+                line as u16,
+                buffer
+                    .iter()
+                    .map(|x| embedded_graphics::pixelcolor::raw::RawU16::new(x.0).into()),
+            )
+            .unwrap();
+    }
 }

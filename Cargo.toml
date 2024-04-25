@@ -25,7 +25,7 @@ embedded-hal = { version = "1.0.0", optional = true }
 embedded-hal-bus = { version = "0.1.0", optional = true }
 mipidsi = { git = "https://github.com/almindor/mipidsi", branch = "master", optional = true }
 cst816s = { git = "https://github.com/thecodechemist99/cst816s.git", branch = "master", optional = true }
-slint = { version = "1.5.1", default-features = false, features = ["compat-1-2", "unsafe-single-threaded", "libm"] }
+slint = { version = "1.5.1", default-features = false, features = ["compat-1-0"] }
 
 [build-dependencies]
 slint-build = { version = "1.5.1" }
