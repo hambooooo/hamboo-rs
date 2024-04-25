@@ -32,7 +32,7 @@ slint-build = { version = "1.5.1" }
 
 [features]
 simulator = ["slint/renderer-winit-software", "slint/backend-winit"]
-default = [
+esp32s3 = [
     "slint/unsafe-single-threaded",
     "slint/libm",
     "esp-backtrace",

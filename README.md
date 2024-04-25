@@ -20,7 +20,7 @@
 > **Hardware**: Touch screen, microphone, speaker, gyroscope, wireless charging, external RTC, pressure sensor, SDMMC <br>
 > **Software Planning**: OTA, dial, music player, sports record, games, NFC access bus card, Bluetooth dial, alarm clock, stopwatch, timer... <br>
 
-## Design
+## 📐 Design
 
 ### 📐 Blender modeling and 3d printing
 
@@ -69,9 +69,10 @@ espup install
 # To uninstall
 # espup uninstall
 export . ~/export-esp.sh
-# Firmware 
-cargo check
-cargo run --release
+```
+```bash
+# Firmware
+cargo +esp run --target=xtensa-esp32s3-none-elf --features=esp32s3 --release
 # Run with simulator
 cargo run --features=simulator --release
 ```

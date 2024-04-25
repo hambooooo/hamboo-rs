@@ -52,6 +52,7 @@ fn main() -> Result<(), slint::PlatformError> {
     create_slint_app().run()
 }
 
+#[cfg(not(feature = "simulator"))]
 #[global_allocator]
 static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
 
