@@ -1,5 +1,5 @@
 [target.xtensa-esp32s3-none-elf]
-runner = "espflash flash  --no-stub --monitor"
+runner = "espflash flash --monitor"
 
 
 [env]

@@ -171,6 +171,11 @@ impl slint::platform::Platform for SlintPlatform {
         let mut touch = CST816S::new(i2c, touch_int, touch_rst);
         touch.setup(&mut delay).unwrap();
 
+        let size = display.size();
+        let size = slint::PhysicalSize::new(size.width, size.height);
+
+        self.window.borrow().as_ref().unwrap().set_size(size);
+
         let mut buffer_provider = DrawBuffer {
             display,
             buffer: &mut [slint::platform::software_renderer::Rgb565Pixel(0); 240],
@@ -180,6 +185,31 @@ impl slint::platform::Platform for SlintPlatform {
             slint::platform::update_timers_and_animations();
 
             if let Some(window) = self.window.borrow().clone() {
+
+
+                let button = slint::platform::PointerEventButton::Left;
+                if let Some(event) = touch.read_one_touch_event(true).map(|record| {
+                    let position = slint::PhysicalPosition::new(record.x as _, record.y as _)
+                        .to_logical(window.scale_factor());
+                    esp_println::println!("{:?}", record);
+                    match record.action {
+                        0 => WindowEvent::PointerPressed { position, button },
+                        1 => WindowEvent::PointerReleased { position, button },
+                        2 => WindowEvent::PointerMoved { position },
+                        _ => WindowEvent::PointerExited,
+                    }
+                }) {
+                    esp_println::println!("{:?}", event);
+                    let is_pointer_release_event: bool = matches!(event, WindowEvent::PointerReleased { .. });
+                    window.dispatch_event(event);
+
+                    // removes hover state on widgets
+                    if is_pointer_release_event {
+                        window.dispatch_event(WindowEvent::PointerExited);
+                    }
+                }
+
+
                 window.draw_if_needed(|renderer| {
                     renderer.render_by_line(&mut buffer_provider);
                 });
@@ -188,27 +218,7 @@ impl slint::platform::Platform for SlintPlatform {
                 }
             }
 
-            // let button = slint::platform::PointerEventButton::Left;
-            // if let Some(event) = touch.read_one_touch_event(true).map(|record| {
-            //     let position = slint::PhysicalPosition::new(record.x as _, record.y as _)
-            //         .to_logical(self.window.scale_factor());
-            //     esp_println::println!("{:?}", record);
-            //     match record.action {
-            //         0 => WindowEvent::PointerPressed { position, button },
-            //         1 => WindowEvent::PointerReleased { position, button },
-            //         2 => WindowEvent::PointerMoved { position },
-            //         _ => WindowEvent::PointerExited,
-            //     }
-            // }) {
-            //     esp_println::println!("{:?}", event);
-            //     let is_pointer_release_event: bool = matches!(event, WindowEvent::PointerReleased { .. });
-            //     self.window.dispatch_event(event);
-            //
-            //     // removes hover state on widgets
-            //     if is_pointer_release_event {
-            //         self.window.dispatch_event(WindowEvent::PointerExited);
-            //     }
-            // }
+
         }
     }
 }

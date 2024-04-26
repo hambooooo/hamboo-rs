@@ -81,7 +81,7 @@ cargo run --features=simulator --release
 
 - [X] Display
 - [X] Touch
-- [ ] Slint
+- [X] Slint
 - [ ] Other drivers
 - [ ] OTA
 - [ ] Watch dial
