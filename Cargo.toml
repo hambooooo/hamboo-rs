@@ -1,10 +1,16 @@
+
 [package]
-name = "hambooo-rs"
+name = "hambooo"
 version = "0.1.0"
 authors = ["Michael"]
 edition = "2021"
-license = "MIT OR Apache-2.0"
 build = "build.rs"
+
+readme = "README.md"
+license = "MIT and Apache-2.0"
+description = "Hamboo - ⌚Smartwatch based on Esp32-S3 chip"
+keywords = ["hamboo", "Slint", "esp32", "esp32-s3", "smartwatch"]
+repository = "https://github.com/hambooooo/hamboo-rs"
 
 [dependencies]
 esp-backtrace = { version = "0.11.1", features = [

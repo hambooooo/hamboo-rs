@@ -51,10 +51,10 @@ fn create_slint_app() -> AppWindow {
     let ui = AppWindow::new().expect("Failed to load UI");
 
     let ui_handle = ui.as_weak();
-    ui.on_request_increase_value(move || {
-        let ui = ui_handle.unwrap();
-        ui.set_counter(ui.get_counter() + 1);
-    });
+    // ui.on_request_increase_value(move || {
+    //     let ui = ui_handle.unwrap();
+    //     ui.set_counter(ui.get_counter() + 1);
+    // });
     ui
 }
 
@@ -186,12 +186,11 @@ impl slint::platform::Platform for SlintPlatform {
 
             if let Some(window) = self.window.borrow().clone() {
 
-
                 let button = slint::platform::PointerEventButton::Left;
                 if let Some(event) = touch.read_one_touch_event(true).map(|record| {
                     let position = slint::PhysicalPosition::new(record.x as _, record.y as _)
                         .to_logical(window.scale_factor());
-                    esp_println::println!("{:?}", record);
+                    // esp_println::println!("{:?}", record);
                     match record.action {
                         0 => WindowEvent::PointerPressed { position, button },
                         1 => WindowEvent::PointerReleased { position, button },
@@ -199,7 +198,7 @@ impl slint::platform::Platform for SlintPlatform {
                         _ => WindowEvent::PointerExited,
                     }
                 }) {
-                    esp_println::println!("{:?}", event);
+                    // esp_println::println!("{:?}", event);
                     let is_pointer_release_event: bool = matches!(event, WindowEvent::PointerReleased { .. });
                     window.dispatch_event(event);
 
@@ -209,7 +208,6 @@ impl slint::platform::Platform for SlintPlatform {
                     }
                 }
 
-
                 window.draw_if_needed(|renderer| {
                     renderer.render_by_line(&mut buffer_provider);
                 });
@@ -217,8 +215,6 @@ impl slint::platform::Platform for SlintPlatform {
                     continue;
                 }
             }
-
-
         }
     }
 }

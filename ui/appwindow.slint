@@ -1,20 +1,74 @@
-import { Button, VerticalBox , AboutSlint } from "std-widgets.slint";
+import { Button, GridBox, VerticalBox , AboutSlint } from "std-widgets.slint";
+
+enum Pages {
+  Homepage,
+  Settings,
+  Apps
+}
 
 export component AppWindow inherits Window {
     width: 240px;
     height: 280px;
-    in-out property<int> counter: 42;
-    callback request-increase-value();
-    VerticalBox {
-        Text {
-            text: "Counter: \{root.counter}";
+    in-out property <Pages> current_page: Pages.Homepage;
+    Rectangle {
+        visible: current_page == Pages.Homepage;
+        Image {
+            source: @image-url("./images/Hamboo.jpg");
+                Button {
+                    x: 0; y:root.height - self.height;
+                    height: 50px;
+                    width: root.width;
+                    text: "Settings";
+                    clicked => {
+                        root.current_page = Pages.Settings;
+                    }
+                }
+
+                Text {
+                    x: (root.width - self.width) / 2;
+                    y: (root.height - self.height) / 6;
+                    text: "12";
+                    font-size: 100px;
+                    font-weight: 800;
+                    color: #dfe4fd;
+                }
+
+                Text {
+                    x: (root.width - self.width) / 2;
+                    y: (root.height - self.height) / 6 * 5;
+                    text: "55";
+                    font-size: 100px;
+                    font-weight: 800;
+                    color: #f9f8de;
+                }
         }
-        Button {
-            text: "Increase value";
-            clicked => {
-                root.request-increase-value();
+    }
+
+    Rectangle {
+        visible: current_page == Pages.Settings ;
+        Flickable {
+            interactive: true;
+            viewport-height: 800px;
+            viewport-width: root.width;
+            viewport-x: 0px;
+            viewport-y: 400px;
+            property <[color]> colors : [#ff9d9d,#fff,#c4c4c4,#111,#444, #457, #312] ;
+            for color[index] in colors:  Rectangle {
+                y: 100px *  index;
+                height: 50px;
+                width: root.width;
+                background: color;
             }
         }
-        AboutSlint { }
-     }
+
+        Button {
+            x: 0; y:root.height - self.height;
+            height: 50px;
+            width: root.width;
+            text: "Homepage";
+            clicked => {
+                root.current_page = Pages.Homepage;
+            }
+        }
+    }
 }
