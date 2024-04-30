@@ -72,9 +72,8 @@ export . ~/export-esp.sh
 ```
 ```bash
 # Firmware
-cargo +esp run --target=xtensa-esp32s3-none-elf --features=esp32s3 --release
-# Run with simulator
-cargo run --features=simulator --release
+cargo check --release
+cargo run --release
 ```
 
 ### 📋 Planning

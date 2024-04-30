@@ -1,0 +1,29 @@
+import { Button, GridBox, VerticalBox , AboutSlint } from "std-widgets.slint";
+
+
+
+export component App {
+    width: 240px;
+    height: 280px;
+    in property <string> clock_text <=> clock.text;
+    Rectangle {
+        Image {
+            source: @image-url("./images/Hamboo.jpg");
+            date := Text {
+                x: root.width - self.width - 15px;
+                y: (root.height - self.height) / 8;
+                text: "30th Apr";
+                font-size: 13px;
+                color: gold;
+            }
+            clock := Text {
+                x: root.width - self.width - 15px;
+                y: (root.height - self.height) / 5;
+                text: "12:55";
+                font-size: 30px;
+                font-weight: 700;
+                color: #fff;
+            }
+        }
+    }
+}
