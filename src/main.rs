@@ -16,7 +16,9 @@ fn main() -> ! {
     init_heap();
 
     // Configure platform for Slint
-    slint::platform::set_platform(Box::new(hambooo::esp32s3::SlintPlatform::default())).expect("backend already initialized");
+    let esp_platform = hambooo::esp32s3::EspPlatform::default();
+    slint::platform::set_platform(Box::new(esp_platform.clone())).expect("backend already initialized");
+
 
     create_app().run().unwrap();
     panic!("The MCU demo should not quit");

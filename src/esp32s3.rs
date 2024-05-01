@@ -2,34 +2,34 @@ extern crate alloc;
 
 use alloc::rc::Rc;
 use core::cell::RefCell;
+
 use cst816s::CST816S;
+use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
 use embedded_graphics::prelude::*;
 use embedded_hal::digital::OutputPin;
+use embedded_hal_bus::i2c::RefCellDevice;
 use embedded_hal_bus::spi::ExclusiveDevice;
 use esp_alloc::EspHeap;
 use esp_backtrace as _;
 use esp_hal::{
-    clock::ClockControl,
-    delay::Delay,
-    gpio::IO,
-    i2c::I2C,
-    peripherals::Peripherals,
-    prelude::*,
-    rtc_cntl::Rtc,
-    spi::{master::Spi, SpiMode},
-    systimer::SystemTimer,
-    timer::TimerGroup,
+    Blocking, clock::ClockControl, delay::Delay, gpio::IO, i2c::I2C, peripherals::Peripherals,
+    prelude::*, rtc_cntl::Rtc, spi::{master::Spi, SpiMode}, systimer::SystemTimer, timer::TimerGroup,
 };
+use esp_hal::clock::Clocks;
+use esp_hal::gpio::{GpioPin, Input, Output, PullUp, PushPull};
+use esp_hal::peripheral::Peripheral;
+use esp_hal::peripherals::{I2C1, SPI3};
+use esp_hal::spi::FullDuplexMode;
+use log::log;
 use mipidsi::{
     {Builder, options::ColorInversion},
     Display,
     models::ST7789,
     options::ColorOrder,
 };
-
 use pcf85063a::PCF85063;
-
+use slint::Model;
 use slint::platform::WindowEvent;
 
 slint::include_modules!();
@@ -43,25 +43,12 @@ pub fn init_heap() {
     unsafe { ALLOCATOR.init(&mut HEAP as *mut u8, core::mem::size_of_val(&HEAP)) }
 }
 
-pub fn init_out_rtc() {
-    // let i2c = ;
-    // PCF85063::new(i2c);
+#[derive(Default, Clone)]
+pub struct EspPlatform {
+    pub window: RefCell<Option<Rc<slint::platform::software_renderer::MinimalSoftwareWindow>>>,
 }
 
-pub fn init_i2c() {
-
-}
-
-pub fn init_display() {
-
-}
-
-#[derive(Default)]
-pub struct SlintPlatform {
-    window: RefCell<Option<Rc<slint::platform::software_renderer::MinimalSoftwareWindow>>>,
-}
-
-impl slint::platform::Platform for SlintPlatform {
+impl slint::platform::Platform for EspPlatform {
     fn create_window_adapter(
         &self,
     ) -> Result<Rc<dyn slint::platform::WindowAdapter>, slint::PlatformError>
@@ -142,7 +129,16 @@ impl slint::platform::Platform for SlintPlatform {
         let touch_scl = io.pins.gpio12;
 
         let i2c = I2C::new(peripherals.I2C1, touch_sda, touch_scl, 400u32.kHz(), &clocks, None);
-        let mut touch = CST816S::new(i2c, touch_int, touch_rst);
+
+        /// To share i2c bus
+        /// https://github.com/rust-embedded/embedded-hal/issues/35
+        let i2c_ref_cell = RefCell::new(i2c);
+
+        let mut touch = CST816S::new(
+            RefCellDevice::new(&i2c_ref_cell),
+            touch_int,
+            touch_rst
+        );
         touch.setup(&mut delay).unwrap();
 
         let size = display.size();
@@ -159,7 +155,6 @@ impl slint::platform::Platform for SlintPlatform {
             slint::platform::update_timers_and_animations();
 
             if let Some(window) = self.window.borrow().clone() {
-
                 let button = slint::platform::PointerEventButton::Left;
                 if let Some(event) = touch.read_one_touch_event(true).map(|record| {
                     let position = slint::PhysicalPosition::new(record.x as _, record.y as _)
@@ -199,8 +194,8 @@ struct DrawBuffer<'a, Display> {
 }
 
 impl<
-    DI: display_interface::WriteOnlyDataCommand,
-    RST: OutputPin<Error = core::convert::Infallible>,
+    DI: WriteOnlyDataCommand,
+    RST: OutputPin<Error=core::convert::Infallible>,
 > slint::platform::software_renderer::LineBufferProvider
 for &mut DrawBuffer<'_, Display<DI, ST7789, RST>>
 {
