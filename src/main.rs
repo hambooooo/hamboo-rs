@@ -3,6 +3,15 @@
 
 extern crate alloc;
 
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::string::ToString;
+use alloc::sync::Arc;
+use core::cell::{OnceCell, RefCell};
+use core::mem::MaybeUninit;
+use core::time::Duration;
+
 use cst816s::CST816S;
 use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
@@ -14,7 +23,7 @@ use esp_backtrace as _;
 use esp_hal::{Blocking, entry};
 use esp_hal::clock::ClockControl;
 use esp_hal::delay::Delay;
-use esp_hal::gpio::IO;
+use esp_hal::gpio::{GpioPin, IO, Output, PushPull};
 use esp_hal::i2c::{Error, I2C};
 use esp_hal::peripherals::{I2C1, Peripherals};
 use esp_hal::prelude::_fugit_RateExtU32;
@@ -29,18 +38,9 @@ use mipidsi::{Builder, Display};
 use mipidsi::models::ST7789;
 use mipidsi::options::{ColorInversion, ColorOrder};
 use pcf8563::{DateTime, Error as RtcError, PCF8563};
-use slint::{Timer, TimerMode};
+use slint::{Timer, TimerMode, Weak};
 use slint::platform::{Platform, WindowEvent};
 use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
-
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::rc::Rc;
-use alloc::string::ToString;
-use alloc::sync::Arc;
-use core::cell::{OnceCell, RefCell};
-use core::mem::MaybeUninit;
-use core::time::Duration;
 
 slint::include_modules!();
 
@@ -58,7 +58,6 @@ fn init_heap() {
 
 
 static mut I2C_BUS: OnceCell<RefCell<I2C<I2C1, Blocking>>> = OnceCell::new();
-
 static MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 #[entry]
@@ -131,7 +130,7 @@ fn main() -> ! {
         I2C_BUS.get_or_init(|| i2c_ref_cell);
     }
 
-    let i2c_ref_cell = unsafe { I2C_BUS.get().unwrap()};
+    let i2c_ref_cell = unsafe { I2C_BUS.get().unwrap() };
 
     let mut touch = CST816S::new(
         RefCellDevice::new(i2c_ref_cell),
@@ -155,25 +154,11 @@ fn main() -> ! {
     window.set_size(size);
 
     let app = App::new().unwrap();
-    let app_weak = app.as_weak();
 
     let timer = Timer::default();
-
-    timer.start(TimerMode::Repeated, Duration::from_secs(5), move || {
-        match app_weak.upgrade() {
-            Some(app) => {
-                match rtc.get_datetime() {
-                    Ok(date_time) => {
-                        app.set_hours_text(format!("{:02}", date_time.hours).into());
-                        app.set_minutes_text(format!("{:02}", date_time.minutes).into());
-                        let date = format!("{}th {}", date_time.day, MONTHS[(date_time.month - 1) as usize]);
-                        app.set_date_text(date.into());
-                    }
-                    Err(_) => {}
-                };
-            }
-            None => {}
-        }
+    update_datetime(&mut rtc, app.as_weak());
+    timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
+        update_datetime(&mut rtc, app.as_weak());
     });
 
     loop {
@@ -207,6 +192,24 @@ fn main() -> ! {
         if window.has_active_animations() {
             continue;
         }
+    }
+}
+
+fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, app_weak: Weak<App>) {
+    match app_weak.upgrade() {
+        Some(app) => {
+            match rtc.get_datetime() {
+                Ok(date_time) => {
+                    app.set_hours_text(format!("{:02}", date_time.hours).into());
+                    app.set_minutes_text(format!("{:02}", date_time.minutes).into());
+                    let date = format!("{}th {}", date_time.day, MONTHS[(date_time.month - 1) as usize]);
+                    app.set_date_text(date.into());
+                    app.set_datetime_show(true);
+                }
+                Err(_) => {}
+            };
+        }
+        None => {}
     }
 }
 

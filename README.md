@@ -31,9 +31,10 @@
 ### 🖥️ Circuit diagram & PCB
 
 <div>
-<img width="30%" height="200" src="docs/circuit-diagram.png"/>
-<img width="30%" height="200" src="docs/PCB.png"/>
-<img width="30%" height="200" src="docs/PCB3D.png"/>
+<img width="49%" height="350" src="docs/circuit-diagram.png"/>
+<img width="49%" height="350" src="docs/PCB.png"/>
+<img width="49%" height="350" src="docs/PCB-3D-A.png"/>
+<img width="49%" height="350" src="docs/PCB-3D-B.png"/>
 </div>
 
 [hamboo-pcb.zip](docs%2Fhamboo-pcb.zip)

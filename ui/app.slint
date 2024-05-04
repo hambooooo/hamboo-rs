@@ -8,25 +8,28 @@ export component App {
     in property <string> date_text <=> date.text;
     in property <string> hours_text <=> hours.text;
     in property <string> minutes_text <=> minutes.text;
+    in property <bool> datetime_show : false;
     Rectangle {
         Image {
             source: @image-url("./images/Hamboo.jpg");
             date := Text {
-                x: root.width - self.width - 10px;
+                visible: root.datetime_show;
+                x: root.width - self.width - 5px;
                 y: (root.height - self.height) / 7;
                 text: "30th Apr";
-                font-size: 15px;
+                font-size: 20px;
                 color: gold;
             }
             Rectangle{
-                x: 150px;
-                y: 45px;
-                width: 90px;
-                height: 50px;
+                visible: root.datetime_show;
+                x: 120px;
+                y: 50px;
+                width: 120px;
+                height: 60px;
                 hours := Text {
                     x: 0px;
                     text: "12";
-                    font-size: 30px;
+                    font-size: 45px;
                     font-weight: 700;
                     color: #fff;
                 }
@@ -34,7 +37,7 @@ export component App {
                     x: hours.width + 2px;
                     y: (parent.height - self.height) / 2  - 2px;
                     text: ":";
-                    font-size: 30px;
+                    font-size: 40px;
                     font-weight: 700;
                     color: #fff;
                     animate opacity {
@@ -48,7 +51,7 @@ export component App {
                 minutes := Text {
                     x: seconds.x + seconds.width + 2px;
                     text: "55";
-                    font-size: 30px;
+                    font-size: 45px;
                     font-weight: 700;
                     color: #fff;
                 }
