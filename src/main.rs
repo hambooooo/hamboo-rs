@@ -3,14 +3,6 @@
 
 extern crate alloc;
 
-use alloc::boxed::Box;
-use alloc::format;
-use alloc::rc::Rc;
-use alloc::sync::Arc;
-use core::cell::{OnceCell, RefCell};
-use core::mem::MaybeUninit;
-use core::time::Duration;
-
 use cst816s::CST816S;
 use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
@@ -40,6 +32,15 @@ use pcf8563::{DateTime, Error as RtcError, PCF8563};
 use slint::{Timer, TimerMode};
 use slint::platform::{Platform, WindowEvent};
 use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
+
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::string::ToString;
+use alloc::sync::Arc;
+use core::cell::{OnceCell, RefCell};
+use core::mem::MaybeUninit;
+use core::time::Duration;
 
 slint::include_modules!();
 
@@ -119,7 +120,7 @@ fn main() -> ! {
     let i2c_sda = io.pins.gpio11;
     let i2c_scl = io.pins.gpio12;
 
-    let i2c = I2C::new(peripherals.I2C1, i2c_sda, i2c_scl, 400u32.kHz(), &clocks, None);
+    let i2c = I2C::new(peripherals.I2C1, i2c_sda, i2c_scl, 100u32.kHz(), &clocks, None);
 
     /// To share i2c bus, see @ https://github.com/rust-embedded/embedded-hal/issues/35
     let i2c_ref_cell = RefCell::new(i2c);
@@ -127,8 +128,7 @@ fn main() -> ! {
     unsafe {
         I2C_BUS.get_or_init(|| i2c_ref_cell);
     }
-    //
-    // let i2c_ref_cell = unsafe { I2C_BUS.take().unwrap() };
+
     let i2c_ref_cell = unsafe { I2C_BUS.get().unwrap()};
 
     let mut touch = CST816S::new(
@@ -141,11 +141,7 @@ fn main() -> ! {
     let size = display.size();
     let size = slint::PhysicalSize::new(size.width, size.height);
 
-    let i2c_ref_cell2 = unsafe { I2C_BUS.get().unwrap()};
-    let mut rtc = PCF8563::new(RefCellDevice::new(i2c_ref_cell2));
-    let date_time = rtc.get_datetime().unwrap();
-    println!("{}", format!("{} {}", date_time.hours, date_time.minutes));
-
+    let mut rtc = PCF8563::new(RefCellDevice::new(i2c_ref_cell));
 
     let mut buffer_provider = DrawBuffer {
         display,
@@ -160,20 +156,22 @@ fn main() -> ! {
     let app_weak = app.as_weak();
 
     let timer = Timer::default();
-    timer.start(TimerMode::Repeated, Duration::from_millis(500), move || {
+
+    timer.start(TimerMode::Repeated, Duration::from_secs(5), move || {
         match app_weak.upgrade() {
             Some(app) => {
                 match rtc.get_datetime() {
                     Ok(date_time) => {
-                        let time = format!("{}:{}:{}", date_time.hours, date_time.minutes, date_time.seconds);
-                        app.set_time_text(time.into());
+                        app.set_hours_text(date_time.hours.to_string().into());
+                        app.set_minutes_text(date_time.minutes.to_string().into());
+                        let date = format!("{}th {}", date_time.day, date_time.month);
+                        app.set_date_text(date.into());
                     }
                     Err(_) => {}
                 };
             }
             None => {}
         }
-
     });
 
     loop {

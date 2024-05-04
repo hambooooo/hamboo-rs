@@ -1,4 +1,4 @@
-import { Button, GridBox, VerticalBox , AboutSlint } from "std-widgets.slint";
+import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-widgets.slint";
 
 
 
@@ -6,7 +6,8 @@ export component App {
     width: 240px;
     height: 280px;
     in property <string> date_text <=> date.text;
-    in property <string> time_text <=> time.text;
+    in property <string> hours_text <=> hours.text;
+    in property <string> minutes_text <=> minutes.text;
     Rectangle {
         Image {
             source: @image-url("./images/Hamboo.jpg");
@@ -14,25 +15,52 @@ export component App {
                 x: root.width - self.width - 15px;
                 y: (root.height - self.height) / 8;
                 text: "30th Apr";
-                font-size: 13px;
+                font-size: 15px;
                 color: gold;
             }
-            time := Text {
-                x: root.width - self.width - 15px;
-                y: (root.height - self.height) / 5;
-                text: "12:55";
-                font-size: 30px;
-                font-weight: 700;
-                color: #fff;
-            }
-            Button {
-                property <bool> is_clicked : false;
-                text: "Click me";
-                clicked => {
-                    self.text = self.is_clicked ? "Clicked" : "Click me";
-                    self.is_clicked = !self.is_clicked;
+            Rectangle{
+                x: 140px;
+                y: 45px;
+                width: 100px;
+                height: 50px;
+                hours := Text {
+                    x: 0px;
+                    text: "12";
+                    font-size: 30px;
+                    font-weight: 700;
+                    color: #fff;
+                }
+                seconds := Text {
+                    x: hours.width + 2px;
+                    y: (parent.height - self.height) / 2  - 2px;
+                    text: ":";
+                    font-size: 30px;
+                    font-weight: 700;
+                    color: #fff;
+                    animate opacity {
+                        duration: 1s;
+                        iteration-count:-1;
+                    }
+                    init => {
+                        self.opacity = 1;
+                    }
+                }
+                minutes := Text {
+                    x: seconds.x + seconds.width + 2px;
+                    text: "55";
+                    font-size: 30px;
+                    font-weight: 700;
+                    color: #fff;
                 }
             }
+//            Button {
+//                property <bool> is_clicked : false;
+//                text: "Click me";
+//                clicked => {
+//                    self.text = self.is_clicked ? "Clicked" : "Click me";
+//                    self.is_clicked = !self.is_clicked;
+//                }
+//            }
         }
     }
 }
