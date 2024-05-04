@@ -34,10 +34,6 @@ slint = { version = "1.5.1", default-features = false, features = ["compat-1-0",
 
 pcf8563 = { git = "https://github.com/nebelgrau77/pcf8563-rs", branch = "embedded-hal-1" }
 
-lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
-
-spin = {version = "0.9.8", features = ["default"]}
-
 [build-dependencies]
 slint-build = { version = "1.5.1" }
 

@@ -1,16 +1,18 @@
 extern crate alloc;
-extern crate lazy_static;
 
+use alloc::boxed::Box;
 use alloc::format;
 use alloc::rc::Rc;
 use alloc::string::{String, ToString};
-use core::cell::RefCell;
+use core::any;
+use core::cell::{OnceCell, RefCell};
 
 use cst816s::CST816S;
 use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
 use embedded_graphics::prelude::*;
 use embedded_hal::digital::OutputPin;
+use embedded_hal::i2c::I2c;
 use embedded_hal_bus::i2c::RefCellDevice;
 use embedded_hal_bus::spi::ExclusiveDevice;
 use esp_alloc::EspHeap;
@@ -25,7 +27,6 @@ use esp_hal::peripheral::Peripheral;
 use esp_hal::peripherals::{I2C1, SPI3};
 use esp_hal::spi::FullDuplexMode;
 use esp_println::println;
-use lazy_static::lazy_static;
 use log::log;
 use mipidsi::{
     {Builder, options::ColorInversion},
@@ -36,13 +37,8 @@ use mipidsi::{
 use pcf8563::{DateTime, PCF8563};
 use slint::Model;
 use slint::platform::WindowEvent;
-use spin::Mutex;
 
 slint::include_modules!();
-
-lazy_static! {
-    static ref I2C_BUS: Mutex<RefCell<Option<RefCell<I2C<'static, I2C1, Blocking>>>>> = Mutex::new(RefCell::new(None));
-}
 
 pub fn init_heap() {
     // HEAP configuration
@@ -53,12 +49,6 @@ pub fn init_heap() {
     unsafe { ALLOCATOR.init(&mut HEAP as *mut u8, core::mem::size_of_val(&HEAP)) }
 }
 
-// pub fn get_datetime() -> String{
-//     let i2c_ref_cell = I2C_BUS.lock().take().unwrap();
-//     let mut rtc = PCF8563::new(RefCellDevice::new(&i2c_ref_cell));
-//     let date_time = rtc.get_datetime().unwrap();
-//     format!("{} {}", date_time.hours, date_time.minutes)
-// }
 
 #[derive(Default)]
 pub struct EspPlatform {
@@ -138,6 +128,7 @@ impl slint::platform::Platform for EspPlatform {
             .invert_colors(ColorInversion::Inverted)
             .init(&mut delay)
             .unwrap();
+
         log::info!("display init.");
 
         let touch_int = io.pins.gpio9.into_pull_up_input();
@@ -150,8 +141,6 @@ impl slint::platform::Platform for EspPlatform {
         /// To share i2c bus
         /// https://github.com/rust-embedded/embedded-hal/issues/35
         let i2c_ref_cell = RefCell::new(i2c);
-        // I2C_BUS.lock().replace(Some(RefCell::new(i2c)));
-        // let i2c_ref_cell = I2C_BUS.lock().take().unwrap();
 
         let mut touch = CST816S::new(
             RefCellDevice::new(&i2c_ref_cell),
