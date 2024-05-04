@@ -59,6 +59,8 @@ fn init_heap() {
 
 static mut I2C_BUS: OnceCell<RefCell<I2C<I2C1, Blocking>>> = OnceCell::new();
 
+static MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 #[entry]
 fn main() -> ! {
     init_heap();
@@ -162,9 +164,9 @@ fn main() -> ! {
             Some(app) => {
                 match rtc.get_datetime() {
                     Ok(date_time) => {
-                        app.set_hours_text(date_time.hours.to_string().into());
-                        app.set_minutes_text(date_time.minutes.to_string().into());
-                        let date = format!("{}th {}", date_time.day, date_time.month);
+                        app.set_hours_text(format!("{:02}", date_time.hours).into());
+                        app.set_minutes_text(format!("{:02}", date_time.minutes).into());
+                        let date = format!("{}th {}", date_time.day, MONTHS[(date_time.month - 1) as usize]);
                         app.set_date_text(date.into());
                     }
                     Err(_) => {}
