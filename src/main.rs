@@ -4,38 +4,265 @@
 extern crate alloc;
 
 use alloc::boxed::Box;
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::sync::Arc;
+use core::cell::{OnceCell, RefCell};
+use core::mem::MaybeUninit;
 use core::time::Duration;
 
-use esp_hal::entry;
+use cst816s::CST816S;
+use display_interface::WriteOnlyDataCommand;
+use display_interface_spi::SPIInterface;
+use embedded_graphics::prelude::OriginDimensions;
+use embedded_hal::digital::OutputPin;
+use embedded_hal_bus::i2c::RefCellDevice;
+use embedded_hal_bus::spi::ExclusiveDevice;
+use esp_backtrace as _;
+use esp_hal::{Blocking, entry};
+use esp_hal::clock::ClockControl;
+use esp_hal::delay::Delay;
+use esp_hal::gpio::IO;
+use esp_hal::i2c::{Error, I2C};
+use esp_hal::peripherals::{I2C1, Peripherals};
+use esp_hal::prelude::_fugit_RateExtU32;
+use esp_hal::rtc_cntl::Rtc;
+use esp_hal::spi::master::Spi;
+use esp_hal::spi::SpiMode;
+use esp_hal::system::SystemExt;
+use esp_hal::systimer::SystemTimer;
+use esp_hal::timer::TimerGroup;
 use esp_println::println;
+use mipidsi::{Builder, Display};
+use mipidsi::models::ST7789;
+use mipidsi::options::{ColorInversion, ColorOrder};
+use pcf8563::{DateTime, Error as RtcError, PCF8563};
 use slint::{Timer, TimerMode};
-use hambooo::esp32s3;
-
-
+use slint::platform::{Platform, WindowEvent};
+use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
 
 slint::include_modules!();
 
-#[entry]
-fn main() -> ! {
-    esp32s3::init_heap();
+#[global_allocator]
+static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
 
-    // Configure platform for Slint
-    slint::platform::set_platform(Box::new(esp32s3::EspPlatform::default())).expect("backend already initialized");
+fn init_heap() {
+    const HEAP_SIZE: usize = 32 * 1024;
+    static mut HEAP: MaybeUninit<[u8; HEAP_SIZE]> = MaybeUninit::uninit();
 
-    create_app().run().unwrap();
-    panic!("The MCU demo should not quit");
+    unsafe {
+        ALLOCATOR.init(HEAP.as_mut_ptr() as *mut u8, HEAP_SIZE);
+    }
 }
 
-fn create_app() -> App {
-    let app = App::new().expect("Failed to load UI");
+
+static mut I2C_BUS: OnceCell<RefCell<I2C<I2C1, Blocking>>> = OnceCell::new();
+
+#[entry]
+fn main() -> ! {
+    init_heap();
+    let peripherals = Peripherals::take();
+    let system = peripherals.SYSTEM.split();
+    let clocks = ClockControl::max(system.clock_control).freeze();
+    let mut delay = Delay::new(&clocks);
+    esp_println::logger::init_logger_from_env();
+
+    let mut rtc = Rtc::new(peripherals.LPWR, None);
+
+    // Create timer groups
+    let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks, None);
+    // Get watchdog timers of timer groups
+    let mut wdt0 = timer_group0.wdt;
+    let timer_group1 = TimerGroup::new(peripherals.TIMG1, &clocks, None);
+    let mut wdt1 = timer_group1.wdt;
+
+    // Disable watchdog timers
+    rtc.swd.disable();
+    rtc.rwdt.disable();
+    wdt0.disable();
+    wdt1.disable();
+
+    let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
+    let cs = io.pins.gpio16.into_push_pull_output();
+    let dc = io.pins.gpio17.into_push_pull_output();
+    let rst = io.pins.gpio13.into_push_pull_output();
+    let clk = io.pins.gpio15.into_push_pull_output();
+    let mosi = io.pins.gpio14.into_push_pull_output();
+    let mut bl = io.pins.gpio18.into_push_pull_output();
+
+    bl.set_high();
+
+    let spi = Spi::new(
+        peripherals.SPI3,
+        40u32.MHz(),
+        SpiMode::Mode3,
+        &clocks,
+    );
+    let spi = spi.with_sck(clk).with_mosi(mosi);
+    log::info!("spi init.");
+
+    let spi_device = ExclusiveDevice::new(spi, cs, delay);
+    let di = SPIInterface::new(spi_device, dc);
+    let display = Builder::new(ST7789, di)
+        .reset_pin(rst)
+        .display_size(240, 280)
+        .display_offset(0, 20)
+        .color_order(ColorOrder::Rgb)
+        .invert_colors(ColorInversion::Inverted)
+        .init(&mut delay)
+        .unwrap();
+
+    log::info!("display init.");
+
+    let touch_int = io.pins.gpio9.into_pull_up_input();
+    let touch_rst = io.pins.gpio10.into_push_pull_output();
+    let i2c_sda = io.pins.gpio11;
+    let i2c_scl = io.pins.gpio12;
+
+    let i2c = I2C::new(peripherals.I2C1, i2c_sda, i2c_scl, 400u32.kHz(), &clocks, None);
+
+    /// To share i2c bus, see @ https://github.com/rust-embedded/embedded-hal/issues/35
+    let i2c_ref_cell = RefCell::new(i2c);
+
+    unsafe {
+        I2C_BUS.get_or_init(|| i2c_ref_cell);
+    }
     //
-    // slint::run_event_loop().expect("Slint run event loop panic!");
-    // let timer = Timer::default();
-    // timer.start(TimerMode::Repeated, Duration::from_millis(200), move || {
-    //     let datetime = esp32s3::get_datetime();
-    //     // app_weak.unwrap().set_time_text(datetime.into());
-    //     println!("Current time ==> {}", datetime);
-    // });
-    // slint::run_event_loop().expect("Slint run event loop panic!");
-    app
+    // let i2c_ref_cell = unsafe { I2C_BUS.take().unwrap() };
+    let i2c_ref_cell = unsafe { I2C_BUS.get().unwrap()};
+
+    let mut touch = CST816S::new(
+        RefCellDevice::new(i2c_ref_cell),
+        touch_int,
+        touch_rst,
+    );
+    touch.setup(&mut delay).unwrap();
+
+    let size = display.size();
+    let size = slint::PhysicalSize::new(size.width, size.height);
+
+    let i2c_ref_cell2 = unsafe { I2C_BUS.get().unwrap()};
+    let mut rtc = PCF8563::new(RefCellDevice::new(i2c_ref_cell2));
+    let date_time = rtc.get_datetime().unwrap();
+    println!("{}", format!("{} {}", date_time.hours, date_time.minutes));
+
+
+    let mut buffer_provider = DrawBuffer {
+        display,
+        buffer: &mut [Rgb565Pixel(0); 240],
+    };
+
+    let window = MinimalSoftwareWindow::new(RepaintBufferType::ReusedBuffer);
+    slint::platform::set_platform(Box::new(Backend { window: window.clone() })).expect("Set platform error");
+    window.set_size(size);
+
+    let app = App::new().unwrap();
+    let app_weak = app.as_weak();
+
+    let timer = Timer::default();
+    timer.start(TimerMode::Repeated, Duration::from_millis(500), move || {
+        match app_weak.upgrade() {
+            Some(app) => {
+                match rtc.get_datetime() {
+                    Ok(date_time) => {
+                        let time = format!("{}:{}:{}", date_time.hours, date_time.minutes, date_time.seconds);
+                        app.set_time_text(time.into());
+                    }
+                    Err(_) => {}
+                };
+            }
+            None => {}
+        }
+
+    });
+
+    loop {
+        slint::platform::update_timers_and_animations();
+
+        let button = slint::platform::PointerEventButton::Left;
+        if let Some(event) = touch.read_one_touch_event(true).map(|record| {
+            let position = slint::PhysicalPosition::new(record.x as _, record.y as _)
+                .to_logical(window.scale_factor());
+            // esp_println::println!("{:?}", record);
+            match record.action {
+                0 => WindowEvent::PointerPressed { position, button },
+                1 => WindowEvent::PointerReleased { position, button },
+                2 => WindowEvent::PointerMoved { position },
+                _ => WindowEvent::PointerExited,
+            }
+        }) {
+            // esp_println::println!("{:?}", event);
+            let is_pointer_release_event: bool = matches!(event, WindowEvent::PointerReleased { .. });
+            window.dispatch_event(event);
+
+            // removes hover state on widgets
+            if is_pointer_release_event {
+                window.dispatch_event(WindowEvent::PointerExited);
+            }
+        }
+
+        window.draw_if_needed(|renderer| {
+            renderer.render_by_line(&mut buffer_provider);
+        });
+        if window.has_active_animations() {
+            continue;
+        }
+    }
+}
+
+
+struct Backend {
+    window: Rc<MinimalSoftwareWindow>,
+}
+
+impl Platform for Backend {
+    fn create_window_adapter(&self) -> Result<Rc<dyn slint::platform::WindowAdapter>, slint::PlatformError> {
+        // Since on MCUs, there can be only one window, just return a clone of self.window.
+        // We'll also use the same window in the event loop.
+        Ok(self.window.clone())
+    }
+
+    fn duration_since_start(&self) -> Duration {
+        Duration::from_millis(
+            SystemTimer::now() * 1_000 / SystemTimer::TICKS_PER_SECOND,
+        )
+    }
+
+    // fn run_event_loop(&self) -> Result<(), slint::PlatformError>
+    fn debug_log(&self, arguments: core::fmt::Arguments) {
+        log::debug!("Slint: {:?}", arguments);
+    }
+}
+
+struct DrawBuffer<'a, Display> {
+    display: Display,
+    buffer: &'a mut [Rgb565Pixel],
+}
+
+impl<DI, RST> LineBufferProvider for &mut DrawBuffer<'_, Display<DI, ST7789, RST>>
+    where
+        DI: WriteOnlyDataCommand,
+        RST: OutputPin<Error=core::convert::Infallible>,
+{
+    type TargetPixel = Rgb565Pixel;
+
+    fn process_line(
+        &mut self,
+        line: usize,
+        range: core::ops::Range<usize>,
+        render_fn: impl FnOnce(&mut [Rgb565Pixel]),
+    ) {
+        let buffer = &mut self.buffer[range.clone()];
+
+        render_fn(buffer);
+
+        // We send empty data just to get the device in the right window
+        self.display.set_pixels(
+            range.start as u16,
+            line as _,
+            range.end as u16,
+            line as u16,
+            buffer.iter().map(|x| embedded_graphics::pixelcolor::raw::RawU16::new(x.0).into()),
+        ).unwrap();
+    }
 }
