@@ -21,7 +21,7 @@ esp-backtrace = { version = "0.11.1", features = [
 esp-hal = { version = "0.17.0", features = ["esp32s3", "embedded-hal"] }
 esp-alloc = { version = "0.3.0" }
 esp-println = { version = "0.9.1", features = ["esp32s3", "log"] }
-log = { version = "0.4.21" }
+#log = { version = "0.4.21" }
 
 display-interface = { version = "0.5.0" }
 display-interface-spi = { version = "0.5.0" }

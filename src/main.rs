@@ -33,7 +33,7 @@ use esp_hal::spi::SpiMode;
 use esp_hal::system::SystemExt;
 use esp_hal::systimer::SystemTimer;
 use esp_hal::timer::TimerGroup;
-use esp_println::println;
+// use esp_println::println;
 use mipidsi::{Builder, Display};
 use mipidsi::models::ST7789;
 use mipidsi::options::{ColorInversion, ColorOrder};
@@ -48,7 +48,7 @@ slint::include_modules!();
 static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
 
 fn init_heap() {
-    const HEAP_SIZE: usize = 32 * 1024;
+    const HEAP_SIZE: usize = 64 * 1024;
     static mut HEAP: MaybeUninit<[u8; HEAP_SIZE]> = MaybeUninit::uninit();
 
     unsafe {
@@ -101,7 +101,7 @@ fn main() -> ! {
         &clocks,
     );
     let spi = spi.with_sck(clk).with_mosi(mosi);
-    log::info!("spi init.");
+    // log::info!("spi init.");
 
     let spi_device = ExclusiveDevice::new(spi, cs, delay);
     let di = SPIInterface::new(spi_device, dc);
@@ -114,7 +114,7 @@ fn main() -> ! {
         .init(&mut delay)
         .unwrap();
 
-    log::info!("display init.");
+    // log::info!("display init.");
 
     let touch_int = io.pins.gpio9.into_pull_up_input();
     let touch_rst = io.pins.gpio10.into_push_pull_output();
@@ -166,8 +166,7 @@ fn main() -> ! {
 
         let button = slint::platform::PointerEventButton::Left;
         if let Some(event) = touch.read_one_touch_event(true).map(|record| {
-            let position = slint::PhysicalPosition::new(record.x as _, record.y as _)
-                .to_logical(window.scale_factor());
+            let position = slint::PhysicalPosition::new(record.x as _, record.y as _).to_logical(window.scale_factor());
             // esp_println::println!("{:?}", record);
             match record.action {
                 0 => WindowEvent::PointerPressed { position, button },
@@ -233,7 +232,7 @@ impl Platform for Backend {
 
     // fn run_event_loop(&self) -> Result<(), slint::PlatformError>
     fn debug_log(&self, arguments: core::fmt::Arguments) {
-        log::debug!("Slint: {:?}", arguments);
+        // log::debug!("Slint: {:?}", arguments);
     }
 }
 

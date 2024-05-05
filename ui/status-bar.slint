@@ -1,0 +1,148 @@
+import { Button, GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
+
+export component StatusBar inherits Rectangle {
+    width: 240px;
+    height: 280px;
+    GridBox {
+        Row {
+            Rectangle {
+                background: #eee;
+                border-radius: 10px;
+                GridBox {
+                    Row {
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: "<<<";
+                        }
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: "@";
+                        }
+                    }
+                    Row{
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: "#";
+                        }
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: "*";
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                background: #eee;
+                border-radius: 10px;
+                GridBox {
+                    Row {
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: "@";
+                        }
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: "#";
+                        }
+                    }
+                    Row {
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: "*";
+                        }
+                        Button {
+                            height: 40px;
+                            width: 40px;
+                            text: ")))";
+                        }
+                    }
+                }
+            }
+        }
+
+        Row {
+            Rectangle {
+                colspan: 2;
+                background: #888;
+                border-radius: 10px;
+                width: 220px;
+                height: 20px;
+            }
+        }
+        Row {
+            Rectangle {
+                colspan: 2;
+                background: #87fd;
+                border-radius: 10px;
+                width: 220px;
+                height: 20px;
+            }
+        }
+        Row {
+            Rectangle {
+                border-color: gray;
+                border-width: 1px;
+                colspan: 2;
+                VerticalBox {
+                    padding:0;
+                    spacing: 0;
+                    HorizontalBox {
+                        Image {
+                            source: @image-url("./images/music.jpg");
+                        }
+                        GridBox {
+                            Row {
+                                Text {
+                                    colspan: 3;
+                                    text: "[Golden Hour]She's got Gliter for skin";
+                                    overflow: elide;
+                                }
+                            }
+                            Row {
+                                Button {
+                                    text: "<";
+                                }
+                                Button {
+                                    text: "▶";
+                                }
+                                Button {
+                                    text: ">";
+                                }
+                            }
+                        }
+                    }
+                    HorizontalBox {
+                        padding-top: 0px;
+                        padding-bottom: 5px;
+                        spacing: 5px;
+                        Text {
+                            width: 18px;
+                            text: "1.30";
+                            font-size: 10px;
+                        }
+                        Rectangle {
+                            width: 150px;
+                            background: #888;
+                            border-radius: 5px;
+                            height: 10px;
+                        }
+                        Text {
+                            width: 18px;
+                            text: "-0.1";
+                            font-size: 10px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    @children
+
+}

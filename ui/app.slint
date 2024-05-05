@@ -1,5 +1,5 @@
 import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-widgets.slint";
-
+import { StatusBar } from "./status-bar.slint";
 
 
 export component App {
@@ -8,8 +8,27 @@ export component App {
     in property <string> date_text <=> date.text;
     in property <string> hours_text <=> hours.text;
     in property <string> minutes_text <=> minutes.text;
-    in property <bool> datetime_show : false;
-    Rectangle {
+    in property <bool> datetime_show : true;
+    status_bar := StatusBar {
+        property <duration> animate_time : 0;
+        visible: false;
+        y: -280px;
+        z: 1;
+//        TouchArea {
+//            moved => {
+//                if (self.pressed_y < 50px) {
+//                    status-bar.visible = true;
+//                    status-bar.y = -280px + self.mouse_y;
+//                }
+//            }
+//        }
+        animate y {
+             duration: status-bar.animate_time;
+        }
+    }
+    home := Rectangle {
+        opacity: 1;
+        z: 0;
         Image {
             source: @image-url("./images/Hamboo.jpg");
             date := Text {
@@ -56,14 +75,33 @@ export component App {
                     color: #fff;
                 }
             }
-//            Button {
-//                property <bool> is_clicked : false;
-//                text: "Click me";
-//                clicked => {
-//                    self.text = self.is_clicked ? "Clicked" : "Click me";
-//                    self.is_clicked = !self.is_clicked;
-//                }
-//            }
+        }
+        TouchArea {
+            moved => {
+                if (self.pressed_y < 50px) {
+                    status-bar.visible = true;
+                    status-bar.animate_time = 0;
+                    status-bar.y = -280px + self.mouse_y;
+
+                    home.opacity = (root.height - self.mouse_y) / root.height;
+
+                }
+            }
+            pointer-event(event) => {
+                if (event.kind == PointerEventKind.up) {
+
+                    status-bar.animate_time = 100ms;
+                    if (self.mouse_y < root.height / 2) {
+                        status-bar.y = -280px;
+//                        status-bar.visible = false;
+                        home.visible = true;
+                        home.opacity = 1;
+                    } else {
+                        status-bar.y = 0px;
+                        home.visible = false;
+                    }
+                }
+            }
         }
     }
 }
