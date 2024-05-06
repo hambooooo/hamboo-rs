@@ -1,4 +1,5 @@
 import { Button, GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
+import { Slider } from "./compontents/slider.slint";
 
 export component StatusBar inherits Rectangle {
     width: 240px;
@@ -15,25 +16,25 @@ export component StatusBar inherits Rectangle {
                         Button {
                             height: 40px;
                             width: 40px;
-                            text: "<<<";
+                            icon: @image-url("images/icon-airplane-mode.svg");
                         }
                         Button {
                             height: 40px;
                             width: 40px;
-                            text: "@";
+                            icon: @image-url("images/icon-disable-alarm.svg");
                         }
                     }
                     Row{
                         Button {
-                            height: 40px;
-                            width: 40px;
-                            text: "#";
-                        }
-                        Button {
-                            height: 40px;
-                            width: 40px;
-                            text: "*";
-                        }
+                             height: 40px;
+                             width: 40px;
+                             icon: @image-url("images/icon-wifi.svg");
+                         }
+                         Button {
+                             height: 40px;
+                             width: 40px;
+                             icon: @image-url("images/icon-bluetools.svg");
+                         }
                     }
                 }
             }
@@ -45,24 +46,24 @@ export component StatusBar inherits Rectangle {
                         Button {
                             height: 40px;
                             width: 40px;
-                            text: "@";
+                            icon: @image-url("images/icon-calculate.svg");
                         }
                         Button {
                             height: 40px;
                             width: 40px;
-                            text: "#";
+                            icon: @image-url("images/icon-eye-protection-mode.svg");
                         }
                     }
                     Row {
                         Button {
                             height: 40px;
                             width: 40px;
-                            text: "*";
+                            icon: @image-url("images/icon-light.svg");
                         }
                         Button {
                             height: 40px;
                             width: 40px;
-                            text: ")))";
+                            icon: @image-url("images/icon-settings.svg");
                         }
                     }
                 }
@@ -70,21 +71,27 @@ export component StatusBar inherits Rectangle {
         }
 
         Row {
-            Rectangle {
+            Slider {
                 colspan: 2;
-                background: #888;
-                border-radius: 10px;
                 width: 240px;
-                height: 20px;
+                value: 20;
+                Image {
+                    x: 5px;
+                    width: 20px;
+                    source: @image-url("./images/icon-brightness.svg");
+                }
             }
         }
         Row {
-            Rectangle {
+            Slider {
                 colspan: 2;
-                background: #87fd;
-                border-radius: 10px;
                 width: 240px;
-                height: 20px;
+                value: 50;
+                Image {
+                    x: 5px;
+                    width: 20px;
+                    source: parent.value > 0 ? @image-url("./images/icon-volume.svg") : @image-url("./images/icon-volume-disable.svg");
+                }
             }
         }
         Row {
