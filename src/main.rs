@@ -16,6 +16,7 @@ use cst816s::CST816S;
 use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
 use embedded_graphics::prelude::OriginDimensions;
+use embedded_hal::delay::DelayNs;
 use embedded_hal::digital::OutputPin;
 use embedded_hal_bus::i2c::RefCellDevice;
 use embedded_hal_bus::spi::ExclusiveDevice;
@@ -33,6 +34,7 @@ use esp_hal::spi::SpiMode;
 use esp_hal::system::SystemExt;
 use esp_hal::systimer::SystemTimer;
 use esp_hal::timer::TimerGroup;
+use esp_hal::xtensa_lx::timer::delay;
 // use esp_println::println;
 use mipidsi::{Builder, Display};
 use mipidsi::models::ST7789;
@@ -48,7 +50,7 @@ slint::include_modules!();
 static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
 
 fn init_heap() {
-    const HEAP_SIZE: usize = 64 * 1024;
+    const HEAP_SIZE: usize = 128 * 1024;
     static mut HEAP: MaybeUninit<[u8; HEAP_SIZE]> = MaybeUninit::uninit();
 
     unsafe {
@@ -59,6 +61,7 @@ fn init_heap() {
 
 static mut I2C_BUS: OnceCell<RefCell<I2C<I2C1, Blocking>>> = OnceCell::new();
 static MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+static mut TOUCH_RELEASED: bool = false;
 
 #[entry]
 fn main() -> ! {
@@ -92,7 +95,7 @@ fn main() -> ! {
     let mosi = io.pins.gpio14.into_push_pull_output();
     let mut bl = io.pins.gpio18.into_push_pull_output();
 
-    bl.set_high();
+    // bl.set_high();
 
     let spi = Spi::new(
         peripherals.SPI3,
@@ -121,7 +124,7 @@ fn main() -> ! {
     let i2c_sda = io.pins.gpio11;
     let i2c_scl = io.pins.gpio12;
 
-    let i2c = I2C::new(peripherals.I2C1, i2c_sda, i2c_scl, 100u32.kHz(), &clocks, None);
+    let i2c = I2C::new(peripherals.I2C1, i2c_sda, i2c_scl, 400u32.kHz(), &clocks, None);
 
     /// To share i2c bus, see @ https://github.com/rust-embedded/embedded-hal/issues/35
     let i2c_ref_cell = RefCell::new(i2c);
@@ -153,14 +156,22 @@ fn main() -> ! {
     slint::platform::set_platform(Box::new(Backend { window: window.clone() })).expect("Set platform error");
     window.set_size(size);
 
-    let app = App::new().unwrap();
 
-    let timer = Timer::default();
+    let light_timer = Timer::default();
+    light_timer.start(TimerMode::SingleShot, Duration::from_secs(1), move || {
+        bl.set_high();
+    });
+
+    let datetime_timer = Timer::default();
+    let app = App::new().unwrap();
     update_datetime(&mut rtc, app.as_weak());
-    timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
+    datetime_timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
         update_datetime(&mut rtc, app.as_weak());
     });
 
+    let mut touch_delay_timer: Option<Timer> = None;
+    let mut last_touch_position = None;
+    let mut last_touch_button = None;
     loop {
         slint::platform::update_timers_and_animations();
 
@@ -168,6 +179,12 @@ fn main() -> ! {
         if let Some(event) = touch.read_one_touch_event(true).map(|record| {
             let position = slint::PhysicalPosition::new(record.x as _, record.y as _).to_logical(window.scale_factor());
             // esp_println::println!("{:?}", record);
+            last_touch_position = Some(position);
+            last_touch_button = Some(button);
+            let touch_released = unsafe {TOUCH_RELEASED};
+            if touch_released {
+                return WindowEvent::PointerPressed { position, button };
+            }
             match record.action {
                 0 => WindowEvent::PointerPressed { position, button },
                 1 => WindowEvent::PointerReleased { position, button },
@@ -175,14 +192,29 @@ fn main() -> ! {
                 _ => WindowEvent::PointerExited,
             }
         }) {
-            // esp_println::println!("{:?}", event);
-            let is_pointer_release_event: bool = matches!(event, WindowEvent::PointerReleased { .. });
+            esp_println::println!("{:?}", event);
+            unsafe {
+                TOUCH_RELEASED = false;
+            };
             window.dispatch_event(event);
-
-            // removes hover state on widgets
-            if is_pointer_release_event {
-                window.dispatch_event(WindowEvent::PointerExited);
+            if let Some(touch_timer) = touch_delay_timer {
+                touch_timer.stop();
+                touch_delay_timer = None;
             }
+            let touch_timer = Timer::default();
+            let window_copy = window.clone();
+            touch_timer.start(TimerMode::SingleShot, Duration::from_millis(500), move || {
+                let event = WindowEvent::PointerReleased {
+                    position: last_touch_position.unwrap(),
+                    button: last_touch_button.unwrap(),
+                };
+                unsafe {
+                    TOUCH_RELEASED = true;
+                };
+                // esp_println::println!("{:?}", event);
+                window_copy.dispatch_event(event);
+            });
+            touch_delay_timer = Some(touch_timer);
         }
 
         window.draw_if_needed(|renderer| {
@@ -191,6 +223,7 @@ fn main() -> ! {
         if window.has_active_animations() {
             continue;
         }
+        delay.delay_us(1u32);
     }
 }
 
