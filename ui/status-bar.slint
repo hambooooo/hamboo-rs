@@ -104,7 +104,7 @@ export component StatusBar inherits Rectangle {
                     spacing: 0;
                     HorizontalBox {
                         padding-top: 10px;
-                        padding-bottom: 5px;
+                        padding-bottom: 0;
                         Image {
                             width: 40px;
                             height: 50px;
@@ -124,7 +124,12 @@ export component StatusBar inherits Rectangle {
                                     text: "<";
                                 }
                                 Button {
+                                    property <bool> click: false;
                                     text: "▶";
+                                    clicked => {
+                                        self.text = self.click ? "▶" : "| |";
+                                        self.click = !self.click;
+                                    }
                                 }
                                 Button {
                                     text: ">";
@@ -134,7 +139,7 @@ export component StatusBar inherits Rectangle {
                     }
                     HorizontalBox {
                         padding-top: 0px;
-                        padding-bottom: 10px;
+                        padding-bottom: 5px;
                         spacing: 5px;
                         Text {
                             width: 18px;

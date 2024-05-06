@@ -23,6 +23,7 @@ export component App inherits Window {
             duration: status-bar.animate_time;
         }
         TouchArea {
+            z: -1;
             moved => {
                 if (self.pressed_y - self.mouse_y > (self.pressed_x > self.mouse_x ? self.pressed_x - self.mouse_x : self.mouse_x - self.pressed_x) + 10px) {
                     home.visible = false;
