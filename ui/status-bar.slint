@@ -4,6 +4,8 @@ export component StatusBar inherits Rectangle {
     width: 240px;
     height: 280px;
     GridBox {
+        padding-left: 0;
+        padding-top: 0;
         Row {
             Rectangle {
                 background: #eee;
@@ -72,7 +74,7 @@ export component StatusBar inherits Rectangle {
                 colspan: 2;
                 background: #888;
                 border-radius: 10px;
-                width: 220px;
+                width: 240px;
                 height: 20px;
             }
         }
@@ -81,7 +83,7 @@ export component StatusBar inherits Rectangle {
                 colspan: 2;
                 background: #87fd;
                 border-radius: 10px;
-                width: 220px;
+                width: 240px;
                 height: 20px;
             }
         }
@@ -94,10 +96,15 @@ export component StatusBar inherits Rectangle {
                     padding:0;
                     spacing: 0;
                     HorizontalBox {
+                        padding-top: 10px;
+                        padding-bottom: 5px;
                         Image {
+                            width: 40px;
+                            height: 50px;
                             source: @image-url("./images/music.jpg");
                         }
                         GridBox {
+                            padding-top: 5px;
                             Row {
                                 Text {
                                     colspan: 3;
@@ -120,7 +127,7 @@ export component StatusBar inherits Rectangle {
                     }
                     HorizontalBox {
                         padding-top: 0px;
-                        padding-bottom: 5px;
+                        padding-bottom: 10px;
                         spacing: 5px;
                         Text {
                             width: 18px;
@@ -128,7 +135,7 @@ export component StatusBar inherits Rectangle {
                             font-size: 10px;
                         }
                         Rectangle {
-                            width: 150px;
+                            width: 170px;
                             background: #888;
                             border-radius: 5px;
                             height: 10px;

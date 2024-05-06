@@ -2,7 +2,8 @@ import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-wid
 import { StatusBar } from "./status-bar.slint";
 
 
-export component App {
+export component App inherits Window {
+//    default-font-family: "Manque Regular";
     width: 240px;
     height: 280px;
     in property <string> date_text <=> date.text;
@@ -10,26 +11,41 @@ export component App {
     in property <string> minutes_text <=> minutes.text;
     in property <bool> datetime_show : true;
     status_bar := StatusBar {
+        property <bool> moved: false;
         property <duration> animate_time : 0;
         visible: false;
         y: -280px;
         z: 1;
-//        TouchArea {
-//            moved => {
-//                if (self.pressed_y < 50px) {
-//                    status-bar.visible = true;
-//                    status-bar.y = -280px + self.mouse_y;
-//                }
-//            }
-//        }
-        animate y {
-             duration: status-bar.animate_time;
+        animate y, opacity {
+            duration: status-bar.animate_time;
+        }
+        TouchArea {
+            moved => {
+                if (self.pressed_y - self.mouse_y > (self.pressed_x > self.mouse_x ? self.pressed_x - self.mouse_x : self.mouse_x - self.pressed_x) + 10px) {
+                    home.visible = false;
+                    status-bar.moved = true;
+                    home.opacity = (root.height - self.mouse_y) / root.height;
+                }
+            }
+            pointer-event(event) => {
+                if (event.kind == PointerEventKind.up && status-bar.moved) {
+                    status-bar.animate_time = 200ms;
+                    status-bar.moved = false;
+                    status-bar.y = -280px;
+                    home.visible = true;
+                    status-bar.opacity = 0;
+                    home.opacity = 1;
+                }
+            }
         }
     }
     home := Rectangle {
+        property <bool> moved: false;
         opacity: 1;
         z: 0;
         Image {
+            height: root.height;
+            width: root.width;
             source: @image-url("./images/Hamboo.jpg");
             date := Text {
                 visible: root.datetime_show;
@@ -41,15 +57,15 @@ export component App {
             }
             Rectangle{
                 visible: root.datetime_show;
-                x: 120px;
+                x: 100px;
                 y: 50px;
-                width: 120px;
+                width: 140px;
                 height: 60px;
                 hours := Text {
                     x: 0px;
                     text: "12";
                     font-size: 45px;
-                    font-weight: 700;
+                    font-weight: 800;
                     color: #fff;
                 }
                 seconds := Text {
@@ -77,23 +93,24 @@ export component App {
             }
         }
         TouchArea {
+            x: -0px;
             moved => {
                 if (self.pressed_y < 50px) {
                     status-bar.visible = true;
+                    status-bar.opacity = 1;
                     status-bar.animate_time = 0;
                     status-bar.y = -280px + self.mouse_y;
-
+                    home.moved = true;
                     home.opacity = (root.height - self.mouse_y) / root.height;
-
                 }
             }
             pointer-event(event) => {
-                if (event.kind == PointerEventKind.up) {
-
-                    status-bar.animate_time = 100ms;
+                if (event.kind == PointerEventKind.up && home.moved) {
+                    home.moved = false;
+                    status-bar.animate_time = 200ms;
                     if (self.mouse_y < root.height / 2) {
                         status-bar.y = -280px;
-//                        status-bar.visible = false;
+                        status-bar.opacity = 0;
                         home.visible = true;
                         home.opacity = 1;
                     } else {
