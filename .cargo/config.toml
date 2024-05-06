@@ -1,5 +1,5 @@
 [target.xtensa-esp32s3-none-elf]
-runner = "espflash flash --monitor"
+runner = "espflash flash --flash-size 32mb --flash-mode dio --flash-freq 80mhz --partition-table partitions.csv --monitor "
 
 
 [env]
