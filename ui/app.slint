@@ -1,13 +1,14 @@
 import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-widgets.slint";
 import { StatusBar } from "./status-bar.slint";
 import { Apps } from "./apps.slint";
+import "./fonts/simhei.ttf";
 
 //export global Logic  {
 //    pure callback on-button-clicked(string) -> bool;
 //}
 
 export component App inherits Window {
-//    default-font-family: "Manque Regular";
+    default-font-family: "黑体";
     width: 240px;
     height: 280px;
     in property <string> date_text <=> date.text;
