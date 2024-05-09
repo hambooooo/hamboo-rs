@@ -19,7 +19,7 @@ component App inherits Rectangle {
     }
 }
 
-export component Settings inherits Rectangle {
+export component Apps inherits Rectangle {
     width: 240px;
     height: 280px;
     background: black;
@@ -37,9 +37,9 @@ export component Settings inherits Rectangle {
         {name: "音乐", icon: @image-url("images/app-music.svg") },
         {name: "智能家居", icon: @image-url("images/app-house.svg") },
         {name: "计算器", icon: @image-url("images/app-calculate.svg") },
-        {name: "哔哩哔哩", icon: @image-url("images/app-watch.svg") },
-        {name: "游戏中心", icon: @image-url("images/app-watch.svg") },
-        {name: "系统设置", icon: @image-url("images/app-watch.svg") },
+        {name: "哔哩哔哩", icon: @image-url("images/app-bilibili.svg") },
+        {name: "游戏中心", icon: @image-url("images/app-game.svg") },
+        {name: "系统设置", icon: @image-url("images/app-settings.svg") },
     ];
     Flickable {
         viewport-height: (root.item-height + root.spacing) * root.model.length + root.spacing;

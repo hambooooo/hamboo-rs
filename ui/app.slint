@@ -1,5 +1,6 @@
 import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-widgets.slint";
 import { StatusBar } from "./status-bar.slint";
+import { Apps } from "./apps.slint";
 
 //export global Logic  {
 //    pure callback on-button-clicked(string) -> bool;
@@ -20,7 +21,7 @@ export component App inherits Window {
         y: -280px;
         z: 1;
         animate y, opacity {
-            duration: status-bar.animate_time;
+            duration: self.animate_time;
         }
         TouchArea {
             z: -1;
@@ -43,8 +44,16 @@ export component App inherits Window {
             }
         }
     }
+    apps := Apps {
+        property <duration> animate_time : 0;
+        visible: false;
+        y: 280px;
+        z: 1;
+        animate y, opacity {
+            duration: self.animate_time;
+        }
+    }
     home := Rectangle {
-        property <bool> moved: false;
         opacity: 1;
         z: 0;
         Image {
@@ -98,19 +107,31 @@ export component App inherits Window {
         }
         TouchArea {
             x: -0px;
+            property <bool> is_moved: false;
+            property <int> moved_direction: 1;
             moved => {
                 if (self.pressed_y < 50px) {
                     status-bar.visible = true;
                     status-bar.opacity = 1;
                     status-bar.animate_time = 0;
                     status-bar.y = -280px + self.mouse_y;
-                    home.moved = true;
+                    self.is_moved = true;
+                    self.moved_direction = 1;
+                    //home.opacity = (root.height - self.mouse_y) / root.height;
+                }
+                if (self.pressed_y > root.height - 50px) {
+                    apps.visible = true;
+                    apps.opacity = 1;
+                    apps.animate_time = 0;
+                    apps.y = self.mouse_y;
+                    self.is_moved = true;
+                    self.moved_direction = 2;
                     //home.opacity = (root.height - self.mouse_y) / root.height;
                 }
             }
             pointer-event(event) => {
-                if (event.kind == PointerEventKind.up && home.moved) {
-                    home.moved = false;
+                if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 1) {
+                    self.is_moved = false;
                     status-bar.animate_time = 200ms;
                     if (self.mouse_y < root.height / 2) {
                         status-bar.y = -280px;
@@ -119,6 +140,19 @@ export component App inherits Window {
                         home.opacity = 1;
                     } else {
                         status-bar.y = 0px;
+                        home.visible = false;
+                    }
+                }
+                if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 2) {
+                    self.is_moved = false;
+                    apps.animate_time = 200ms;
+                    if (self.mouse_y > root.height / 2) {
+                        apps.y = 280px;
+                        apps.opacity = 0;
+                        home.visible = true;
+                        home.opacity = 1;
+                    } else {
+                        apps.y = 0px;
                         home.visible = false;
                     }
                 }
