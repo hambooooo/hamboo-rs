@@ -6,8 +6,6 @@ extern crate alloc;
 use alloc::boxed::Box;
 use alloc::format;
 use alloc::rc::Rc;
-use alloc::string::ToString;
-use alloc::sync::Arc;
 use core::cell::{OnceCell, RefCell};
 use core::mem::MaybeUninit;
 use core::time::Duration;
@@ -20,12 +18,11 @@ use embedded_hal::delay::DelayNs;
 use embedded_hal::digital::OutputPin;
 use embedded_hal_bus::i2c::RefCellDevice;
 use embedded_hal_bus::spi::ExclusiveDevice;
-use esp_backtrace as _;
 use esp_hal::{Blocking, entry};
 use esp_hal::clock::ClockControl;
 use esp_hal::delay::Delay;
-use esp_hal::gpio::{GpioPin, IO, Output, PushPull};
-use esp_hal::i2c::{Error, I2C};
+use esp_hal::gpio::IO;
+use esp_hal::i2c::I2C;
 use esp_hal::peripherals::{I2C1, Peripherals};
 use esp_hal::prelude::_fugit_RateExtU32;
 use esp_hal::rtc_cntl::Rtc;
@@ -34,12 +31,15 @@ use esp_hal::spi::SpiMode;
 use esp_hal::system::SystemExt;
 use esp_hal::systimer::SystemTimer;
 use esp_hal::timer::TimerGroup;
-use esp_hal::xtensa_lx::timer::delay;
+use esp_backtrace as _;
+use esp_hal::mcpwm::{MCPWM, PeripheralClockConfig};
+use esp_hal::mcpwm::operator::PwmPinConfig;
+use esp_hal::mcpwm::timer::PwmWorkingMode;
 // use esp_println::println;
 use mipidsi::{Builder, Display};
 use mipidsi::models::ST7789;
 use mipidsi::options::{ColorInversion, ColorOrder};
-use pcf8563::{DateTime, Error as RtcError, PCF8563};
+use pcf8563::PCF8563;
 use slint::{Timer, TimerMode, Weak};
 use slint::platform::{Platform, WindowEvent};
 use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
@@ -96,6 +96,17 @@ fn main() -> ! {
     let mut bl = io.pins.gpio18.into_push_pull_output();
 
     // bl.set_high();
+    // Configure timers for PWM control of the backlight
+    let clock_cfg = PeripheralClockConfig::with_frequency(&clocks, 40u32.MHz()).unwrap();
+    let mut mcpwm = MCPWM::new(peripherals.MCPWM0, clock_cfg);
+    mcpwm.operator0.set_timer(&mcpwm.timer0);
+    let mut backlight_pwm_pin = mcpwm
+        .operator0
+        .with_pin_a(bl, PwmPinConfig::UP_ACTIVE_HIGH);
+    let timer_clock_cfg = clock_cfg
+        .timer_clock_with_frequency(99, PwmWorkingMode::Increase, 20u32.kHz())
+        .unwrap();
+    mcpwm.timer0.start(timer_clock_cfg);
 
     let spi = Spi::new(
         peripherals.SPI3,
@@ -157,10 +168,10 @@ fn main() -> ! {
     window.set_size(size);
 
 
-    let light_timer = Timer::default();
-    light_timer.start(TimerMode::SingleShot, Duration::from_secs(1), move || {
-        bl.set_high();
-    });
+    // let light_timer = Timer::default();
+    // light_timer.start(TimerMode::SingleShot, Duration::from_secs(1), move || {
+    //     bl.set_high();
+    // });
 
     let datetime_timer = Timer::default();
     let app = App::new().unwrap();

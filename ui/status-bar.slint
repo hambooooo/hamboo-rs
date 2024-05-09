@@ -5,160 +5,122 @@ export component StatusBar inherits Rectangle {
     width: 240px;
     height: 280px;
     background: @linear-gradient(45deg, #9fafa6 0%, #ebe8e1 50%, #f6afaf 100%);
-    GridBox {
-        padding-left: 0;
-        padding-top: 0;
-        property <physical-length> button-size: 45px;
-        Row {
-            Rectangle {
-                background: #eee;
-                border-radius: 10px;
-                GridBox {
-                    Row {
-                        Button {
-                            height: button-size;
-                            width: button-size;
-                            icon: @image-url("images/icon-airplane-mode.svg");
-                        }
-                        Button {
-                            height: button-size;
-                            width: button-size;
-                            icon: @image-url("images/icon-disable-alarm.svg");
-                        }
-                    }
-                    Row{
-                        Button {
-                             height: button-size;
-                             width: button-size;
-                             icon: @image-url("images/icon-wifi.svg");
-                         }
-                         Button {
-                             height: button-size;
-                             width: button-size;
-                             icon: @image-url("images/icon-bluetools.svg");
-                         }
-                    }
+    VerticalBox {
+        padding-top: 10px;
+        property <physical-length> button-size: 40px;
+        Rectangle {
+            background: #999;
+            border-radius: 10px;
+            HorizontalBox {
+                Button {
+                    height: button-size;
+                    width: button-size;
+                    icon: @image-url("images/icon-disable-alarm.svg");
                 }
-            }
-            Rectangle {
-                background: #eee;
-                border-radius: 10px;
-                GridBox {
-                    Row {
-                        Button {
-                            height: button-size;
-                            width: button-size;
-                            icon: @image-url("images/icon-calculate.svg");
-                        }
-                        Button {
-                            height: button-size;
-                            width: button-size;
-                            icon: @image-url("images/icon-eye-protection-mode.svg");
-                        }
-                    }
-                    Row {
-                        Button {
-                            height: button-size;
-                            width: button-size;
-                            icon: @image-url("images/icon-light.svg");
-                        }
-                        Button {
-                            height: button-size;
-                            width: button-size;
-                            icon: @image-url("images/icon-settings.svg");
-                        }
-                    }
-                }
+                Button {
+                     height: button-size;
+                     width: button-size;
+                     icon: @image-url("images/icon-wifi.svg");
+                 }
+                 Button {
+                     height: button-size;
+                     width: button-size;
+                     icon: @image-url("images/icon-bluetools.svg");
+                 }
+                 Button {
+                     height: button-size;
+                     width: button-size;
+                     icon: @image-url("images/icon-settings.svg");
+                 }
             }
         }
 
-        Row {
-            Slider {
-                colspan: 2;
-                width: 240px;
-                value: 20;
-                Image {
-                    x: 10px;
-                    width: 15px;
-                    source: @image-url("./images/icon-brightness.svg");
-                }
+        Slider {
+            width: 220px;
+            value: 20;
+            background: #999;
+            Image {
+                x: 20px;
+                width: 15px;
+                source: @image-url("./images/icon-brightness.svg");
             }
         }
-        Row {
-            Slider {
-                colspan: 2;
-                width: 240px;
-                value: 50;
-                Image {
-                    x: 10px;
-                    width: 15px;
-                    source: parent.value > 0 ? @image-url("./images/icon-volume.svg") : @image-url("./images/icon-volume-disable.svg");
-                }
+        Slider {
+            width: 220px;
+            value: 50;
+            background: #999;
+            Image {
+                x: 20px;
+                width: 15px;
+                source: parent.value > 0 ? @image-url("./images/icon-volume.svg") : @image-url("./images/icon-volume-disable.svg");
             }
         }
-        Row {
-            Rectangle {
-                border-color: gray;
-                border-width: 1px;
-                colspan: 2;
-                VerticalBox {
-                    padding:0;
-                    spacing: 0;
-                    HorizontalBox {
-                        padding-top: 10px;
-                        padding-bottom: 0;
-                        Image {
-                            width: 50px;
-                            height: 60px;
-                            source: @image-url("./images/music.jpg");
+        Rectangle {
+            border-color: gray;
+            border-width: 1px;
+            VerticalBox {
+                padding:0;
+                spacing: 0;
+                HorizontalBox {
+                    padding-top: 10px;
+                    padding-bottom: 0;
+                    Image {
+                        width: 50px;
+                        height: 60px;
+                        source: @image-url("./images/music.jpg");
+                    }
+                    GridBox {
+                        padding-left: 0px;
+                        padding-top: 5px;
+                        spacing-horizontal: 5px;
+                        Row {
+                            Text {
+                                colspan: 3;
+                                text: "[Golden Hour]She's got Gliter for skin";
+                                overflow: elide;
+                            }
                         }
-                        GridBox {
-                            padding-top: 5px;
-                            Row {
-                                Text {
-                                    colspan: 3;
-                                    text: "[Golden Hour]She's got Gliter for skin";
-                                    overflow: elide;
+                        Row {
+                            property <physical-length> button-width: 40px;
+                            Button {
+                                width: parent.button-width;
+                                text: "<";
+                            }
+                            Button {
+                                width: parent.button-width;
+                                property <bool> click: false;
+                                text: "▶";
+                                clicked => {
+                                    self.text = self.click ? "▶" : "| |";
+                                    self.click = !self.click;
                                 }
                             }
-                            Row {
-                                Button {
-                                    text: "<";
-                                }
-                                Button {
-                                    property <bool> click: false;
-                                    text: "▶";
-                                    clicked => {
-                                        self.text = self.click ? "▶" : "| |";
-                                        self.click = !self.click;
-                                    }
-                                }
-                                Button {
-                                    text: ">";
-                                }
+                            Button {
+                                width: parent.button-width;
+                                text: ">";
                             }
                         }
                     }
-                    HorizontalBox {
-                        padding-top: 0px;
-                        padding-bottom: 5px;
-                        spacing: 5px;
-                        Text {
-                            width: 18px;
-                            text: "1.30";
-                            font-size: 10px;
-                        }
-                        Rectangle {
-                            width: 170px;
-                            background: #888;
-                            border-radius: 5px;
-                            height: 10px;
-                        }
-                        Text {
-                            width: 18px;
-                            text: "-0.1";
-                            font-size: 10px;
-                        }
+                }
+                HorizontalBox {
+                    padding-top: 5px;
+                    padding-bottom: 5px;
+                    spacing: 5px;
+                    Text {
+                        width: 18px;
+                        text: "1.30";
+                        font-size: 10px;
+                    }
+                    Rectangle {
+                        width: 150px;
+                        background: #888;
+                        border-radius: 5px;
+                        height: 10px;
+                    }
+                    Text {
+                        width: 18px;
+                        text: "-0.1";
+                        font-size: 10px;
                     }
                 }
             }

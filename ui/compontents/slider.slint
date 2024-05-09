@@ -23,8 +23,8 @@ export component Slider inherits Rectangle {
         border-bottom-left-radius: self.height / 2;
         border-top-right-radius: (self.height / 2) - (root.width - self.width);
         border-bottom-right-radius: (self.height / 2) - (root.width - self.width);
-        background: #ffffff;
-        border-color: root.background.darker(5%);
+        background: #fff;
+        border-color: #fff;
         width: root.width * (root.value - root.minimum)/(root.maximum - root.minimum);
     }
     @children
