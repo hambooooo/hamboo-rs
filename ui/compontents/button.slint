@@ -1,7 +1,9 @@
 component Button inherits Rectangle {
     in-out property text <=> txt.text;
+    in-out property <physical-length> font-size;
     in-out property <image> icon;
     in-out property <float> icon-rate : 0.5;
+    in-out property <color> font-color : black;
     callback clicked <=> touch.clicked;
     border-radius: root.height / 8;
     border-width: 1px;
@@ -12,7 +14,8 @@ component Button inherits Rectangle {
     txt := Text {
         x: (parent.width - self.width) / 2 + (touch.pressed ? 2px : 0);
         y: (parent.height - self.height) / 2 + (touch.pressed ? 1px : 0);
-        color: touch.pressed ? #fff : black;
+        font-size: root.font-size;
+        color: font-color;
     }
     Image {
         width: parent.width * icon-rate;
