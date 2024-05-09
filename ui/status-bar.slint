@@ -1,5 +1,6 @@
-import { Button, GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
+import { GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
 import { Slider } from "./compontents/slider.slint";
+import { Button } from "./compontents/button.slint";
 
 export component StatusBar inherits Rectangle {
     width: 240px;
@@ -41,7 +42,7 @@ export component StatusBar inherits Rectangle {
             background: #999;
             Image {
                 x: 20px;
-                width: 15px;
+                width: 20px;
                 source: @image-url("./images/icon-brightness.svg");
             }
         }
@@ -51,7 +52,7 @@ export component StatusBar inherits Rectangle {
             background: #999;
             Image {
                 x: 20px;
-                width: 15px;
+                width: 20px;
                 source: parent.value > 0 ? @image-url("./images/icon-volume.svg") : @image-url("./images/icon-volume-disable.svg");
             }
         }
@@ -73,6 +74,7 @@ export component StatusBar inherits Rectangle {
                         padding-left: 0px;
                         padding-top: 5px;
                         spacing-horizontal: 5px;
+                        spacing-vertical: 15px;
                         Row {
                             Text {
                                 colspan: 3;
@@ -84,10 +86,12 @@ export component StatusBar inherits Rectangle {
                             property <physical-length> button-width: 40px;
                             Button {
                                 width: parent.button-width;
+                                height: parent.button-width / 2;
                                 text: "<";
                             }
                             Button {
                                 width: parent.button-width;
+                                height: parent.button-width / 2;
                                 property <bool> click: false;
                                 text: "▶";
                                 clicked => {
@@ -97,6 +101,7 @@ export component StatusBar inherits Rectangle {
                             }
                             Button {
                                 width: parent.button-width;
+                                height: parent.button-width / 2;
                                 text: ">";
                             }
                         }
