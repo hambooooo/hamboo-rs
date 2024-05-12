@@ -43,6 +43,7 @@ use pcf8563::PCF8563;
 use slint::{Timer, TimerMode, Weak};
 use slint::platform::{Platform, WindowEvent};
 use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
+use hambooo::axp2101::{Axp2101, I2CPowerManagementInterface};
 
 slint::include_modules!();
 
@@ -155,6 +156,11 @@ fn main() -> ! {
 
     let size = display.size();
     let size = slint::PhysicalSize::new(size.width, size.height);
+
+    let i2c_power_management_interface = I2CPowerManagementInterface::new(RefCellDevice::new(i2c_ref_cell));
+    let mut axp2101 = Axp2101::new(i2c_power_management_interface);
+    axp2101.init().unwrap();
+
 
     let mut rtc = PCF8563::new(RefCellDevice::new(i2c_ref_cell));
 
