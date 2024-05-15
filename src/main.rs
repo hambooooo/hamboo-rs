@@ -10,7 +10,7 @@ use core::cell::{OnceCell, RefCell};
 use core::mem::MaybeUninit;
 use core::time::Duration;
 
-use cst816s::CST816S;
+use hambooo::cst816s::CST816S;
 use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
 use embedded_graphics::prelude::OriginDimensions;
@@ -40,8 +40,8 @@ use mipidsi::{Builder, Display};
 use mipidsi::models::ST7789;
 use mipidsi::options::{ColorInversion, ColorOrder};
 use pcf8563::PCF8563;
-use slint::{Timer, TimerMode, Weak};
-use slint::platform::{Platform, WindowEvent};
+use slint::{LogicalPosition, Timer, TimerMode, Weak};
+use slint::platform::{Platform, PointerEventButton, WindowEvent};
 use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
 use hambooo::axp2101::{Axp2101, I2CPowerManagementInterface};
 
@@ -59,10 +59,13 @@ fn init_heap() {
     }
 }
 
-
 static mut I2C_BUS: OnceCell<RefCell<I2C<I2C1, Blocking>>> = OnceCell::new();
 static MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-static mut TOUCH_RELEASED: bool = false;
+static mut TOUCH_RELEASED: bool = true;
+static mut TOUCH_RELEASED_TIMES: u32 = 0;
+
+static mut LAST_TOUCH_POSITION: Option<LogicalPosition> = None;
+static mut LAST_TOUCH_BUTTON: Option<PointerEventButton> = None;
 
 #[entry]
 fn main() -> ! {
@@ -157,10 +160,9 @@ fn main() -> ! {
     let size = display.size();
     let size = slint::PhysicalSize::new(size.width, size.height);
 
-    let i2c_power_management_interface = I2CPowerManagementInterface::new(RefCellDevice::new(i2c_ref_cell));
-    let mut axp2101 = Axp2101::new(i2c_power_management_interface);
-    axp2101.init().unwrap();
-
+    // let i2c_power_management_interface = I2CPowerManagementInterface::new(RefCellDevice::new(i2c_ref_cell));
+    // let mut axp2101 = Axp2101::new(i2c_power_management_interface);
+    // axp2101.init().unwrap();
 
     let mut rtc = PCF8563::new(RefCellDevice::new(i2c_ref_cell));
 
@@ -186,53 +188,51 @@ fn main() -> ! {
         update_datetime(&mut rtc, app.as_weak());
     });
 
-    let mut touch_delay_timer: Option<Timer> = None;
-    let mut last_touch_position = None;
-    let mut last_touch_button = None;
-    loop {
-        slint::platform::update_timers_and_animations();
+    let touch_timer = Timer::default();
 
+    let window_copy = window.clone();
+    touch_timer.start(TimerMode::Repeated, Duration::from_millis(1), move || {
         let button = slint::platform::PointerEventButton::Left;
         if let Some(event) = touch.read_one_touch_event(true).map(|record| {
-            let position = slint::PhysicalPosition::new(record.x as _, record.y as _).to_logical(window.scale_factor());
+            let position = slint::PhysicalPosition::new(record.x as _, record.y as _).to_logical(window_copy.scale_factor());
             // esp_println::println!("{:?}", record);
-            last_touch_position = Some(position);
-            last_touch_button = Some(button);
-            let touch_released = unsafe {TOUCH_RELEASED};
-            if touch_released {
-                return WindowEvent::PointerPressed { position, button };
+            // if unsafe { TOUCH_RELEASED } {
+            //     return WindowEvent::PointerPressed { position, button };
+            // }
+            unsafe {
+                LAST_TOUCH_POSITION = Some(position);
+                LAST_TOUCH_BUTTON = Some(button);
+                TOUCH_RELEASED = false;
+                TOUCH_RELEASED_TIMES = 0;
             }
             match record.action {
                 0 => WindowEvent::PointerPressed { position, button },
-                1 => WindowEvent::PointerReleased { position, button },
+                1 => {
+                    WindowEvent::PointerReleased { position, button }
+                },
                 2 => WindowEvent::PointerMoved { position },
                 _ => WindowEvent::PointerExited,
             }
         }) {
-            esp_println::println!("{:?}", event);
-            unsafe {
-                TOUCH_RELEASED = false;
-            };
-            window.dispatch_event(event);
-            if let Some(touch_timer) = touch_delay_timer {
-                touch_timer.stop();
-                touch_delay_timer = None;
-            }
-            let touch_timer = Timer::default();
-            let window_copy = window.clone();
-            touch_timer.start(TimerMode::SingleShot, Duration::from_millis(500), move || {
+            // esp_println::println!("A ==> {:?}", event);
+            window_copy.dispatch_event(event);
+        } else {
+            if unsafe { !TOUCH_RELEASED && TOUCH_RELEASED_TIMES > 20 } {
                 let event = WindowEvent::PointerReleased {
-                    position: last_touch_position.unwrap(),
-                    button: last_touch_button.unwrap(),
+                    position: unsafe {LAST_TOUCH_POSITION.unwrap()},
+                    button: unsafe {LAST_TOUCH_BUTTON.unwrap()},
                 };
-                unsafe {
-                    TOUCH_RELEASED = true;
-                };
-                // esp_println::println!("{:?}", event);
+                // esp_println::println!("B ==> {:?}", event);
                 window_copy.dispatch_event(event);
-            });
-            touch_delay_timer = Some(touch_timer);
+                unsafe {TOUCH_RELEASED = true};
+                unsafe { TOUCH_RELEASED_TIMES = 0 };
+            }
+            unsafe { TOUCH_RELEASED_TIMES += 1 };
         }
+    });
+
+    loop {
+        slint::platform::update_timers_and_animations();
 
         window.draw_if_needed(|renderer| {
             renderer.render_by_line(&mut buffer_provider);
