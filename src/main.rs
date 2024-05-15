@@ -208,26 +208,29 @@ fn main() -> ! {
             match record.action {
                 0 => WindowEvent::PointerPressed { position, button },
                 1 => {
+                    unsafe {TOUCH_RELEASED = true};
                     WindowEvent::PointerReleased { position, button }
                 },
                 2 => WindowEvent::PointerMoved { position },
                 _ => WindowEvent::PointerExited,
             }
         }) {
-            // esp_println::println!("A ==> {:?}", event);
+            esp_println::println!("A ==> {:?}", event);
             window_copy.dispatch_event(event);
         } else {
-            if unsafe { !TOUCH_RELEASED && TOUCH_RELEASED_TIMES > 20 } {
-                let event = WindowEvent::PointerReleased {
-                    position: unsafe {LAST_TOUCH_POSITION.unwrap()},
-                    button: unsafe {LAST_TOUCH_BUTTON.unwrap()},
-                };
-                // esp_println::println!("B ==> {:?}", event);
-                window_copy.dispatch_event(event);
-                unsafe {TOUCH_RELEASED = true};
-                unsafe { TOUCH_RELEASED_TIMES = 0 };
+            if unsafe { !TOUCH_RELEASED } {
+                if unsafe { TOUCH_RELEASED_TIMES > 100 } {
+                    let event = WindowEvent::PointerReleased {
+                        position: unsafe {LAST_TOUCH_POSITION.unwrap()},
+                        button: unsafe {LAST_TOUCH_BUTTON.unwrap()},
+                    };
+                    esp_println::println!("B ==> {:?}", event);
+                    window_copy.dispatch_event(event);
+                    unsafe {TOUCH_RELEASED = true};
+                    unsafe { TOUCH_RELEASED_TIMES = 0 };
+                }
+                unsafe { TOUCH_RELEASED_TIMES += 1 };
             }
-            unsafe { TOUCH_RELEASED_TIMES += 1 };
         }
     });
 
