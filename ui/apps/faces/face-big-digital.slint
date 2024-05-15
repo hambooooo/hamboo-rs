@@ -1,0 +1,23 @@
+
+export component FaceBigDigital inherits Rectangle {
+    width: 240px;
+    height: 280px;
+    background: black;
+    in property <string> hours_text : "00";
+    in property <string> minutes_text : "00";
+    property <physical-length> font-size : 120px;
+    hours := Text {
+        y: root.height / 2 - self.height / 10 * 9;
+        text: "09";
+        font-size: root.font-size;
+        font-weight: 800;
+        color: #8fbc8f;
+    }
+    minutes := Text {
+        y: root.height / 2 - self.height / 10;
+        text: "30";
+        font-size: root.font-size;
+        font-weight: 800;
+        color: #9370b9;
+    }
+}

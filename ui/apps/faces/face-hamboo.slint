@@ -1,0 +1,56 @@
+import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-widgets.slint";
+
+export component FaceHamboo inherits Rectangle {
+    width: 240px;
+    height: 280px;
+    in property <string> date_text : "30th Apr";
+    in property <string> hours_text : "00";
+    in property <string> minutes_text : "00";
+    Image {
+        height: root.height;
+        width: root.width;
+        source: @image-url("../../assets/images/hamboo.jpg");
+        Text {
+            x: root.width - self.width - 5px;
+            y: (root.height - self.height) / 7;
+            text: root.date_text;
+            font-size: 20px;
+            color: gold;
+        }
+        Rectangle{
+            x: 100px;
+            y: 50px;
+            width: 140px;
+            height: 60px;
+            hours := Text {
+                x: 0px;
+                text: "12";
+                font-size: 45px;
+                font-weight: 800;
+                color: #fff;
+            }
+            seconds := Text {
+                x: hours.width + 2px;
+                y: (parent.height - self.height) / 2  - 2px;
+                text: ":";
+                font-size: 40px;
+                font-weight: 700;
+                color: #fff;
+                animate opacity {
+                    duration: 1s;
+                    iteration-count:-1;
+                }
+                init => {
+                    self.opacity = 1;
+                }
+            }
+            minutes := Text {
+                x: seconds.x + seconds.width + 2px;
+                text: "55";
+                font-size: 45px;
+                font-weight: 700;
+                color: #fff;
+            }
+        }
+    }
+}

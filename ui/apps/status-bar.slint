@@ -1,6 +1,6 @@
 import { GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
-import { Slider } from "./compontents/slider.slint";
-import { Button } from "./compontents/button.slint";
+import { Slider } from "../compontents/slider.slint";
+import { Button } from "../compontents/button.slint";
 
 export component StatusBar inherits Rectangle {
     width: 240px;
@@ -18,22 +18,22 @@ export component StatusBar inherits Rectangle {
                 Button {
                     height: button-size;
                     width: button-size;
-                    icon: @image-url("images/icon-disable-alarm.svg");
+                    icon: @image-url("../assets/images/icon-disable-alarm.svg");
                 }
                 Button {
                      height: button-size;
                      width: button-size;
-                     icon: @image-url("images/icon-wifi.svg");
+                     icon: @image-url("../assets/images/icon-wifi.svg");
                  }
                  Button {
                      height: button-size;
                      width: button-size;
-                     icon: @image-url("images/icon-bluetools.svg");
+                     icon: @image-url("../assets/images/icon-bluetools.svg");
                  }
                  Button {
                      height: button-size;
                      width: button-size;
-                     icon: @image-url("images/icon-settings.svg");
+                     icon: @image-url("../assets/images/icon-settings.svg");
                  }
             }
         }
@@ -45,7 +45,7 @@ export component StatusBar inherits Rectangle {
             Image {
                 x: 20px;
                 width: 20px;
-                source: @image-url("./images/icon-brightness.svg");
+                source: @image-url("../assets/images/icon-brightness.svg");
             }
         }
         Slider {
@@ -55,7 +55,7 @@ export component StatusBar inherits Rectangle {
             Image {
                 x: 20px;
                 width: 20px;
-                source: parent.value > 0 ? @image-url("./images/icon-volume.svg") : @image-url("./images/icon-volume-disable.svg");
+                source: parent.value > 0 ? @image-url("../assets/images/icon-volume.svg") : @image-url("../assets/images/icon-volume-disable.svg");
             }
         }
         Rectangle {
@@ -71,7 +71,7 @@ export component StatusBar inherits Rectangle {
                     Image {
                         width: 50px;
                         height: 60px;
-                        source: @image-url("./images/music.jpg");
+                        source: @image-url("../assets/images/music.jpg");
                     }
                     GridBox {
                         padding-left: 0px;

@@ -29,7 +29,7 @@ embedded-graphics = { version = "0.8.1" }
 embedded-hal = { version = "1.0.0" }
 embedded-hal-bus = { version = "0.1.0" }
 mipidsi = { git = "https://github.com/almindor/mipidsi", branch = "master" }
-cst816s = { git = "https://github.com/thecodechemist99/cst816s", branch = "master" }
+#cst816s = { git = "https://github.com/thecodechemist99/cst816s", branch = "master" }
 slint = { version = "1.5.1", default-features = false, features = ["compat-1-0", "unsafe-single-threaded", "libm"] }
 
 pcf8563 = { git = "https://github.com/nebelgrau77/pcf8563-rs", branch = "embedded-hal-1" }

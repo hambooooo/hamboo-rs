@@ -19,7 +19,7 @@ component App inherits Rectangle {
     }
 }
 
-export component Apps inherits Rectangle {
+export component AppLauncher inherits Rectangle {
     width: 240px;
     height: 280px;
     background: black;
@@ -27,19 +27,19 @@ export component Apps inherits Rectangle {
     property <physical-length> spacing: 10px;
     property <float> item-with-ratio: 0.9;
     in property <[{name: string, icon: image}]> model: [
-        {name: "表盘管理", icon: @image-url("images/app-watch.svg") },
-        {name: "天气", icon: @image-url("images/app-weater.svg") },
-        {name: "闹钟", icon: @image-url("images/app-clock.svg") },
-        {name: "秒表", icon: @image-url("images/app-timer.svg") },
-        {name: "NFC", icon: @image-url("images/app-nfc.svg") },
-        {name: "运动健康", icon: @image-url("images/app-sports.svg") },
-        {name: "指南针", icon: @image-url("images/app-compass.svg") },
-        {name: "音乐", icon: @image-url("images/app-music.svg") },
-        {name: "智能家居", icon: @image-url("images/app-house.svg") },
-        {name: "计算器", icon: @image-url("images/app-calculate.svg") },
-        {name: "哔哩哔哩", icon: @image-url("images/app-bilibili.svg") },
-        {name: "游戏中心", icon: @image-url("images/app-game.svg") },
-        {name: "系统设置", icon: @image-url("images/app-settings.svg") },
+        {name: "表盘管理", icon: @image-url("../assets/images/app-watch.svg") },
+        {name: "天气", icon: @image-url("../assets/images/app-weater.svg") },
+        {name: "闹钟", icon: @image-url("../assets/images/app-clock.svg") },
+        {name: "秒表", icon: @image-url("../assets/images/app-timer.svg") },
+        {name: "NFC", icon: @image-url("../assets/images/app-nfc.svg") },
+        {name: "运动健康", icon: @image-url("../assets/images/app-sports.svg") },
+        {name: "指南针", icon: @image-url("../assets/images/app-compass.svg") },
+        {name: "音乐", icon: @image-url("../assets/images/app-music.svg") },
+        {name: "智能家居", icon: @image-url("../assets/images/app-house.svg") },
+        {name: "计算器", icon: @image-url("../assets/images/app-calculate.svg") },
+        {name: "哔哩哔哩", icon: @image-url("../assets/images/app-bilibili.svg") },
+        {name: "游戏中心", icon: @image-url("../assets/images/app-game.svg") },
+        {name: "系统设置", icon: @image-url("../assets/images/app-settings.svg") },
     ];
     Flickable {
         viewport-height: (root.item-height + root.spacing) * root.model.length + root.spacing;

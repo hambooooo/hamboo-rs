@@ -10,7 +10,7 @@ use core::cell::{OnceCell, RefCell};
 use core::mem::MaybeUninit;
 use core::time::Duration;
 
-use cst816s::CST816S;
+use hambooo::cst816s::CST816S;
 use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
 use embedded_graphics::prelude::OriginDimensions;
@@ -180,10 +180,10 @@ fn main() -> ! {
     });
 
     let datetime_timer = Timer::default();
-    let app = App::new().unwrap();
-    update_datetime(&mut rtc, app.as_weak());
+    let ui = UI::new().unwrap();
+    update_datetime(&mut rtc, ui.as_weak());
     datetime_timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
-        update_datetime(&mut rtc, app.as_weak());
+        update_datetime(&mut rtc, ui.as_weak());
     });
 
     let mut touch_delay_timer: Option<Timer> = None;
@@ -193,6 +193,7 @@ fn main() -> ! {
         slint::platform::update_timers_and_animations();
 
         let button = slint::platform::PointerEventButton::Left;
+        // Touch up event question @see https://lupyuen.github.io/articles/touch
         if let Some(event) = touch.read_one_touch_event(true).map(|record| {
             let position = slint::PhysicalPosition::new(record.x as _, record.y as _).to_logical(window.scale_factor());
             // esp_println::println!("{:?}", record);
@@ -244,16 +245,16 @@ fn main() -> ! {
     }
 }
 
-fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, app_weak: Weak<App>) {
-    match app_weak.upgrade() {
-        Some(app) => {
+fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ui_weak: Weak<UI>) {
+    match ui_weak.upgrade() {
+        Some(ui) => {
             match rtc.get_datetime() {
                 Ok(date_time) => {
-                    app.set_hours_text(format!("{:02}", date_time.hours).into());
-                    app.set_minutes_text(format!("{:02}", date_time.minutes).into());
+                    // ui.set_hours_text(format!("{:02}", date_time.hours).into());
+                    // ui.set_minutes_text(format!("{:02}", date_time.minutes).into());
                     let date = format!("{}th {}", date_time.day, MONTHS[(date_time.month - 1) as usize]);
-                    app.set_date_text(date.into());
-                    app.set_datetime_show(true);
+                    // ui.set_date_text(date.into());
+                    // ui.set_datetime_show(true);
                 }
                 Err(_) => {}
             };

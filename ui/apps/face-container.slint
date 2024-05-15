@@ -1,0 +1,16 @@
+import { FaceHamboo } from "./faces/face-hamboo.slint";
+import { FaceBigDigital } from "./faces/face-big-digital.slint";
+
+
+export component FaceContainer {
+    in-out property <int> active-face : 0;
+    Rectangle {
+        FaceHamboo {
+            visible: root.active-face == 0;
+        }
+        FaceBigDigital {
+            visible: root.active-face == 1;
+        }
+    }
+    @children
+}
