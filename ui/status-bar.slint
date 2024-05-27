@@ -1,16 +1,32 @@
 import { GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
 import { Slider } from "./compontents/slider.slint";
 import { Button } from "./compontents/button.slint";
+import { Battary } from "./compontents/battary.slint";
+
 
 export component StatusBar inherits Rectangle {
     width: 240px;
     height: 280px;
-    background: @linear-gradient(45deg, #9fafa6 0%, #ebe8e1 50%, #f6afaf 100%);
+    background: lightgrey;
+    in property <int> battery-percent;
+    in property <bool> battery-charging;
     property <color> fond-color: white;
     property <color> back-color: #999;
     VerticalBox {
-        padding-top: 10px;
-        property <physical-length> button-size: 40px;
+        property <physical-length> button-size: 45px;
+        HorizontalLayout {
+            padding-left: 10px;
+            padding-right: 10px;
+            Text {
+                color: black;
+                font-weight: 500;
+                text: "5月26日 周日 12:55";
+            }
+            Battary {
+                value: root.battery-percent;
+                charging: root.battery-charging;
+            }
+        }
         Rectangle {
             background: root.back-color;
             border-radius: 10px;
@@ -58,7 +74,7 @@ export component StatusBar inherits Rectangle {
                 source: parent.value > 0 ? @image-url("./images/icon-volume.svg") : @image-url("./images/icon-volume-disable.svg");
             }
         }
-        Rectangle {
+        music := Rectangle {
             background: root.back-color;
             border-color: gray;
             border-width: 1px;

@@ -3,9 +3,19 @@ import { StatusBar } from "./status-bar.slint";
 import { Apps } from "./apps.slint";
 import "./fonts/simhei.ttf";
 
-//export global Logic  {
-//    pure callback on-button-clicked(string) -> bool;
-//}
+export global DateTime  {
+    in property <int> year;
+    in property <int> month;
+    in property <int> day;
+    in property <int> week;
+    in property <int> hour;
+    in property <int> minute;
+}
+
+export global Battery  {
+    in property <bool> charging : false;
+    in property <int> percent : 100;
+}
 
 export component App inherits Window {
     default-font-family: "黑体";
@@ -14,10 +24,12 @@ export component App inherits Window {
     in property <string> date_text <=> date.text;
     in property <string> hours_text <=> hours.text;
     in property <string> minutes_text <=> minutes.text;
-    in property <bool> datetime_show : false;
+    in property <bool> datetime_show : true;
     status_bar := StatusBar {
         property <bool> moved: false;
         property <duration> animate_time : 0;
+        battery-percent: Battery.percent;
+        battery-charging: Battery.charging;
         visible: false;
         y: -280px;
         z: 1;

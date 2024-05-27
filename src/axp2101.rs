@@ -1,4 +1,5 @@
-use esp_println::println;
+use esp_println::{print, println};
+use pcf8563::Error;
 
 // Based on https://github.com/tuupola/axp192
 // and https://github.com/m5stack/M5CoreS3/blob/main/src/AXP2101.cpp
@@ -96,7 +97,7 @@ const AXP2101_APS_VOLTAGE: u8 = 0x7e;
 const AXP2101_CHARGE_COULOMB: u8 = 0xb0;
 const AXP2101_DISCHARGE_COULOMB: u8 = 0xb4;
 const AXP2101_COULOMB_COUNTER_CONTROL: u8 = 0xb8;
-
+const AXP2101_BATTERY_PERCENTGE: u8 = 0xa4;
 /* Computed ADC */
 const AXP2101_COULOMB_COUNTER: u8 = 0xff;
 
@@ -121,6 +122,8 @@ pub enum Command {
     // Gpio1Control(bool),
     // Gpio2Control(bool),
     Dcdc1Voltage(u8),
+    Charging,
+    BatteryPersentage,
 }
 
 pub enum DataFormat<'a> {
@@ -147,8 +150,21 @@ impl Command {
             // Command::Gpio1Control(_on) => ([AXP2101_GPIO1_CONTROL, 0x0], 2),
             // Command::Gpio2Control(_on) => ([AXP2101_GPIO2_CONTROL, 104], 2),
             Command::Dcdc1Voltage(voltage) => ([AXP2101_ADC_ENABLE_1, voltage], 2),
+            _ => panic!("Command no read send"),
         };
         iface.send_commands(DataFormat::U8(&data[0..len]))
+    }
+
+    pub fn read<I>(self, iface: &mut I) -> Result<u8, Axp2101Error>
+        where
+            I: Axp2101ReadWrite,
+    {
+        let data = match self {
+            Command::Charging => AXP2101_POWER_STATUS,
+            Command::BatteryPersentage => AXP2101_BATTERY_PERCENTGE,
+            _ => panic!("Command no read method"),
+        };
+        iface.read(DataFormat::U8(&[data; 2]))
     }
 }
 
@@ -162,7 +178,7 @@ pub enum Axp2101Error {
 
 pub trait Axp2101ReadWrite {
     fn send_commands(&mut self, cmd: DataFormat<'_>) -> Result<(), Axp2101Error>;
-    // fn read(&self, addr: u8, reg: u8, buffer: &mut [u8]) -> Result<(), Axp2101Error>;
+    fn read(&mut self, cmd: DataFormat<'_>) -> Result<u8, Axp2101Error>;
     // fn write(&self, addr: u8, reg: u8, buffer: &[u8]) -> Result<(), Axp2101Error>;
 }
 
@@ -194,10 +210,18 @@ impl<I> Axp2101ReadWrite for I2CInterface<I>
         }
     }
 
-    // fn read(&self, addr: u8, reg: u8, buffer: &mut [u8]) -> Result<(), Axp2101Error> {
-    //     // Implement read logic here
-    //     unimplemented!()
-    // }
+    fn read(&mut self, cmd: DataFormat<'_>) -> Result<u8, Axp2101Error> {
+        let mut data_buf = [0];
+
+        match cmd {
+            DataFormat::U8(data) => {
+                self.i2c
+                    .write_read(self.addr, &[data[0]], &mut data_buf)
+                    .map_err(|_| Axp2101Error::WriteError)?;
+                Ok(data_buf[0])
+            }
+        }
+    }
 
     // fn write(&self, addr: u8, reg: u8, buffer: &[u8]) -> Result<(), Axp2101Error> {
     //     // Implement write logic here
@@ -217,10 +241,10 @@ impl<I> Axp2101<I>
     // Initialize AXP2101
     pub fn init(&mut self) -> Result<(), Axp2101Error> {
         // Command::Ldo23Voltage(true).send(&mut self.interface)?;
-        Command::ChgLed(true).send(&mut self.interface)?;
-        Command::AldoEnable(true).send(&mut self.interface)?;
-        Command::Aldo4(true).send(&mut self.interface)?;
-        Command::Dcdc1Voltage(AXP2101_DCDC1_3V3).send(&mut self.interface)?;
+        Command::ChgLed(false).send(&mut self.interface)?;
+        Command::AldoEnable(false).send(&mut self.interface)?;
+        Command::Aldo4(false).send(&mut self.interface)?;
+        // Command::Dcdc1Voltage(AXP2101_DCDC1_3V3).send(&mut self.interface)?;
 
         // Command::Dcdc2Slope(true).send(&mut self.interface)?;
         // Command::Dcdc1Voltage(true).send(&mut self.interface)?;
@@ -232,6 +256,17 @@ impl<I> Axp2101<I>
 
         Ok(())
     }
+    pub fn is_charging(&mut self) -> Result<bool, Axp2101Error> {
+        let value = Command::Charging.read(&mut self.interface)?;
+        // println!("Power charge state ==> 0b{:08b}", value);
+        Ok(value >> 4 == 0b1)
+    }
+    pub fn get_battery_persentage(&mut self) -> Result<u8, Axp2101Error> {
+        let value = Command::BatteryPersentage.read(&mut self.interface)?;
+        // println!("Power battery persentage ==> {:?}%", value);
+        Ok(value)
+    }
+
 }
 
 pub struct I2CInterface<I2C> {

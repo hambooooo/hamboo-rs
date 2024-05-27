@@ -43,7 +43,7 @@ use pcf8563::PCF8563;
 use slint::{LogicalPosition, Timer, TimerMode, Weak};
 use slint::platform::{Platform, PointerEventButton, WindowEvent};
 use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
-use hambooo::axp2101::{Axp2101, I2CPowerManagementInterface};
+use hambooo::axp2101::{Axp2101, I2CInterface, I2CPowerManagementInterface};
 
 slint::include_modules!();
 
@@ -60,7 +60,6 @@ fn init_heap() {
 }
 
 static mut I2C_BUS: OnceCell<RefCell<I2C<I2C1, Blocking>>> = OnceCell::new();
-static MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 static mut TOUCH_RELEASED: bool = true;
 static mut TOUCH_RELEASED_TIMES: u32 = 0;
 
@@ -160,9 +159,9 @@ fn main() -> ! {
     let size = display.size();
     let size = slint::PhysicalSize::new(size.width, size.height);
 
-    // let i2c_power_management_interface = I2CPowerManagementInterface::new(RefCellDevice::new(i2c_ref_cell));
-    // let mut axp2101 = Axp2101::new(i2c_power_management_interface);
-    // axp2101.init().unwrap();
+    let i2c_power_management_interface = I2CPowerManagementInterface::new(RefCellDevice::new(i2c_ref_cell));
+    let mut axp2101 = Axp2101::new(i2c_power_management_interface);
+    axp2101.init().unwrap();
 
     let mut rtc = PCF8563::new(RefCellDevice::new(i2c_ref_cell));
 
@@ -174,31 +173,36 @@ fn main() -> ! {
     let window = MinimalSoftwareWindow::new(RepaintBufferType::ReusedBuffer);
     slint::platform::set_platform(Box::new(Backend { window: window.clone() })).expect("Set platform error");
     window.set_size(size);
+    let app = App::new().unwrap();
 
-
+    // 延迟亮屏，过滤花屏
     let light_timer = Timer::default();
     light_timer.start(TimerMode::SingleShot, Duration::from_millis(100), move || {
         bl.set_high();
     });
 
+    // 定时更新UI日期时间
     let datetime_timer = Timer::default();
-    let app = App::new().unwrap();
     update_datetime(&mut rtc, app.as_weak());
     datetime_timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
         update_datetime(&mut rtc, app.as_weak());
     });
 
-    let touch_timer = Timer::default();
+    // 定时更新电池状态
+    let battery_timer = Timer::default();
+    let app = App::new().unwrap();
+    update_battery(&mut axp2101, app.as_weak());
+    battery_timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
+        update_battery(&mut axp2101, app.as_weak());
+    });
 
+    // 处理触摸屏问题
+    let touch_timer = Timer::default();
     let window_copy = window.clone();
     touch_timer.start(TimerMode::Repeated, Duration::from_millis(1), move || {
-        let button = slint::platform::PointerEventButton::Left;
+        let button = PointerEventButton::Left;
         if let Some(event) = touch.read_one_touch_event(true).map(|record| {
             let position = slint::PhysicalPosition::new(record.x as _, record.y as _).to_logical(window_copy.scale_factor());
-            // esp_println::println!("{:?}", record);
-            // if unsafe { TOUCH_RELEASED } {
-            //     return WindowEvent::PointerPressed { position, button };
-            // }
             unsafe {
                 LAST_TOUCH_POSITION = Some(position);
                 LAST_TOUCH_BUTTON = Some(button);
@@ -252,11 +256,11 @@ fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ap
         Some(app) => {
             match rtc.get_datetime() {
                 Ok(date_time) => {
-                    app.set_hours_text(format!("{:02}", date_time.hours).into());
-                    app.set_minutes_text(format!("{:02}", date_time.minutes).into());
-                    let date = format!("{}th {}", date_time.day, MONTHS[(date_time.month - 1) as usize]);
-                    app.set_date_text(date.into());
-                    app.set_datetime_show(true);
+                    // app.set_hours_text(format!("{:02}", date_time.hours).into());
+                    // app.set_minutes_text(format!("{:02}", date_time.minutes).into());
+                    // let date = format!("{}th {}", date_time.day, MONTHS[(date_time.month - 1) as usize]);
+                    // app.set_date_text(date.into());
+                    // app.set_datetime_show(true);
                 }
                 Err(_) => {}
             };
@@ -265,6 +269,26 @@ fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ap
     }
 }
 
+fn update_battery(power: &mut  Axp2101<I2CInterface<RefCellDevice<I2C<'_, I2C1, Blocking>>>>, app_weak: Weak<App>) {
+    match app_weak.upgrade() {
+        Some(app) => {
+
+            match power.is_charging() {
+                Ok(charging) => {
+                    app.global::<Battery>().set_charging(charging);
+                }
+                Err(_) => {}
+            };
+            match power.get_battery_persentage() {
+                Ok(battery_persent) => {
+                    app.global::<Battery>().set_percent(battery_persent.into());
+                }
+                Err(_) => {}
+            };
+        }
+        None => {}
+    }
+}
 
 struct Backend {
     window: Rc<MinimalSoftwareWindow>,

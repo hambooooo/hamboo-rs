@@ -1,0 +1,45 @@
+
+export component Battary {
+
+    in property <bool> charging : false;
+    in property <int> value;
+    property <color> b_color : value > 20 ? #6b6 : #f88;
+    padding: 0;
+    height: 13px;
+    width: 30px;
+    body := Rectangle {
+        z: 2;
+        padding: 0;
+        width: root.width * 0.8 - self.border-width * 2;
+        border-color: black;
+        border-width: 1px;
+        border-radius: self.height / 4;
+        background: #ccc;
+        Rectangle {
+            z: 0;
+            x: parent.border-width;
+            height: parent.height - parent.border-width * 2;
+            width: (parent.width - parent.border-width * 2) * value / 100;
+            border-radius: parent.border-radius;
+            background: b_color;
+        }
+        Text {
+            z: 1;
+            text: root.value + (root.charging ? "⚡" : "");
+            font-size: 9px;
+            font-weight: 800;
+            color: white;
+        }
+    }
+
+    Rectangle {
+        padding: 0;
+        x: body.width + self.border-width +  root.width * 0.1;
+        width: root.width * 0.1;
+        height: body.height / 2;
+        border-color: black;
+        border-width: 1px;
+        border-radius: self.height / 4;
+        background: b_color;
+    }
+}
