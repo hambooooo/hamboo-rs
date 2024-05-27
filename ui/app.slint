@@ -6,10 +6,11 @@ import "./fonts/simhei.ttf";
 export global DateTime  {
     in property <int> year;
     in property <int> month;
+    in property <int> weekday;
     in property <int> day;
-    in property <int> week;
-    in property <int> hour;
-    in property <int> minute;
+    in property <int> hours;
+    in property <int> minutes;
+    in property <int> seconds;
 }
 
 export global Battery  {
@@ -21,15 +22,19 @@ export component App inherits Window {
     default-font-family: "黑体";
     width: 240px;
     height: 280px;
-    in property <string> date_text <=> date.text;
-    in property <string> hours_text <=> hours.text;
-    in property <string> minutes_text <=> minutes.text;
     in property <bool> datetime_show : true;
     status_bar := StatusBar {
         property <bool> moved: false;
         property <duration> animate_time : 0;
         battery-percent: Battery.percent;
         battery-charging: Battery.charging;
+        date-year: DateTime.year;
+        date-month: DateTime.month;
+        date-weekday: DateTime.weekday;
+        date-day: DateTime.day;
+        time-hours: DateTime.hours;
+        time-minutes: DateTime.minutes;
+        time-seconds: DateTime.seconds;
         visible: false;
         y: -280px;
         z: 1;
@@ -77,19 +82,19 @@ export component App inherits Window {
                 visible: root.datetime_show;
                 x: root.width - self.width - 5px;
                 y: (root.height - self.height) / 7;
-                text: "30th Apr";
+                text: @tr("{}th Apr", DateTime.month);
                 font-size: 20px;
                 color: gold;
             }
             Rectangle{
                 visible: root.datetime_show;
-                x: 100px;
+                x: 120px;
                 y: 50px;
                 width: 140px;
                 height: 60px;
                 hours := Text {
                     x: 0px;
-                    text: "12";
+                    text: DateTime.hours;
                     font-size: 45px;
                     font-weight: 800;
                     color: #fff;
@@ -101,19 +106,12 @@ export component App inherits Window {
                     font-size: 40px;
                     font-weight: 700;
                     color: #fff;
-                    animate opacity {
-                        duration: 1s;
-                        iteration-count:-1;
-                    }
-                    init => {
-                        self.opacity = 1;
-                    }
                 }
                 minutes := Text {
                     x: seconds.x + seconds.width + 2px;
-                    text: "55";
+                    text: DateTime.minutes;
                     font-size: 45px;
-                    font-weight: 700;
+                    font-weight: 800;
                     color: #fff;
                 }
             }

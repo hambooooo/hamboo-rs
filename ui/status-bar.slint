@@ -10,6 +10,13 @@ export component StatusBar inherits Rectangle {
     background: lightgrey;
     in property <int> battery-percent;
     in property <bool> battery-charging;
+    in property <int> date-year;
+    in property <int> date-month;
+    in property <int> date-weekday;
+    in property <int> date-day;
+    in property <int> time-hours;
+    in property <int> time-minutes;
+    in property <int> time-seconds;
     property <color> fond-color: white;
     property <color> back-color: #999;
     VerticalBox {
@@ -20,7 +27,7 @@ export component StatusBar inherits Rectangle {
             Text {
                 color: black;
                 font-weight: 500;
-                text: "5月26日 周日 12:55";
+                text: @tr("{}月{}日 周{} {}:{}", root.date-month, root.date-day, root.date-weekday, root.time-hours, root.time-minutes);
             }
             Battary {
                 value: root.battery-percent;

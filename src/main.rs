@@ -35,6 +35,7 @@ use esp_backtrace as _;
 use esp_hal::mcpwm::{MCPWM, PeripheralClockConfig};
 use esp_hal::mcpwm::operator::PwmPinConfig;
 use esp_hal::mcpwm::timer::PwmWorkingMode;
+use esp_println::println;
 // use esp_println::println;
 use mipidsi::{Builder, Display};
 use mipidsi::models::ST7789;
@@ -184,16 +185,17 @@ fn main() -> ! {
     // 定时更新UI日期时间
     let datetime_timer = Timer::default();
     update_datetime(&mut rtc, app.as_weak());
+    let app_weak = app.as_weak();
     datetime_timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
-        update_datetime(&mut rtc, app.as_weak());
+        update_datetime(&mut rtc, app_weak.clone());
     });
 
     // 定时更新电池状态
     let battery_timer = Timer::default();
-    let app = App::new().unwrap();
     update_battery(&mut axp2101, app.as_weak());
+    let app_week = app.as_weak();
     battery_timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
-        update_battery(&mut axp2101, app.as_weak());
+        update_battery(&mut axp2101, app_week.clone());
     });
 
     // 处理触摸屏问题
@@ -219,7 +221,7 @@ fn main() -> ! {
                 _ => WindowEvent::PointerExited,
             }
         }) {
-            esp_println::println!("A ==> {:?}", event);
+            // esp_println::println!("A ==> {:?}", event);
             window_copy.dispatch_event(event);
         } else {
             if unsafe { !TOUCH_RELEASED } {
@@ -228,7 +230,7 @@ fn main() -> ! {
                         position: unsafe {LAST_TOUCH_POSITION.unwrap()},
                         button: unsafe {LAST_TOUCH_BUTTON.unwrap()},
                     };
-                    esp_println::println!("B ==> {:?}", event);
+                    // esp_println::println!("B ==> {:?}", event);
                     window_copy.dispatch_event(event);
                     unsafe {TOUCH_RELEASED = true};
                     unsafe { TOUCH_RELEASED_TIMES = 0 };
@@ -256,11 +258,14 @@ fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ap
         Some(app) => {
             match rtc.get_datetime() {
                 Ok(date_time) => {
-                    // app.set_hours_text(format!("{:02}", date_time.hours).into());
-                    // app.set_minutes_text(format!("{:02}", date_time.minutes).into());
-                    // let date = format!("{}th {}", date_time.day, MONTHS[(date_time.month - 1) as usize]);
-                    // app.set_date_text(date.into());
-                    // app.set_datetime_show(true);
+                    println!("Current datetime ==> {:#?}", date_time);
+                    app.global::<DateTime>().set_year(date_time.year.into());
+                    app.global::<DateTime>().set_month(date_time.month.into());
+                    app.global::<DateTime>().set_weekday(date_time.weekday.into());
+                    app.global::<DateTime>().set_day(date_time.day.into());
+                    app.global::<DateTime>().set_hours(date_time.hours.into());
+                    app.global::<DateTime>().set_minutes(date_time.minutes.into());
+                    app.global::<DateTime>().set_seconds(date_time.seconds.into());
                 }
                 Err(_) => {}
             };
@@ -272,7 +277,6 @@ fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ap
 fn update_battery(power: &mut  Axp2101<I2CInterface<RefCellDevice<I2C<'_, I2C1, Blocking>>>>, app_weak: Weak<App>) {
     match app_weak.upgrade() {
         Some(app) => {
-
             match power.is_charging() {
                 Ok(charging) => {
                     app.global::<Battery>().set_charging(charging);

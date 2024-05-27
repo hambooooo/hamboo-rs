@@ -200,9 +200,9 @@ impl<I> Axp2101ReadWrite for I2CInterface<I>
                 self.i2c
                     .write_read(self.addr, &[data[0]], &mut data_buf)
                     .map_err(|_| Axp2101Error::WriteError)?;
-                println!("read value for command {:?}: {:?}", data[0], data_buf[0]);
+                // println!("read value for command {:?}: {:?}", data[0], data_buf[0]);
 
-                println!("write value for command {:?}: {:?}", data[0], data[1]);
+                // println!("write value for command {:?}: {:?}", data[0], data[1]);
                 self.i2c
                     .write(self.addr, data)
                     .map_err(|_| Axp2101Error::WriteError)
