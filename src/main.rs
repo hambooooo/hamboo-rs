@@ -4,13 +4,12 @@
 extern crate alloc;
 
 use alloc::boxed::Box;
-use alloc::format;
 use alloc::rc::Rc;
 use core::cell::{OnceCell, RefCell};
 use core::mem::MaybeUninit;
 use core::time::Duration;
 
-use hambooo::cst816s::CST816S;
+use cst816s::CST816S;
 use display_interface::WriteOnlyDataCommand;
 use display_interface_spi::SPIInterface;
 use embedded_graphics::prelude::OriginDimensions;
@@ -32,9 +31,9 @@ use esp_hal::system::SystemExt;
 use esp_hal::systimer::SystemTimer;
 use esp_hal::timer::TimerGroup;
 use esp_backtrace as _;
-use esp_hal::mcpwm::{MCPWM, PeripheralClockConfig};
-use esp_hal::mcpwm::operator::PwmPinConfig;
-use esp_hal::mcpwm::timer::PwmWorkingMode;
+// use esp_hal::mcpwm::{MCPWM, PeripheralClockConfig};
+// use esp_hal::mcpwm::operator::PwmPinConfig;
+// use esp_hal::mcpwm::timer::PwmWorkingMode;
 use esp_println::println;
 // use esp_println::println;
 use mipidsi::{Builder, Display};
@@ -44,7 +43,7 @@ use pcf8563::PCF8563;
 use slint::{LogicalPosition, Timer, TimerMode, Weak};
 use slint::platform::{Platform, PointerEventButton, WindowEvent};
 use slint::platform::software_renderer::{LineBufferProvider, MinimalSoftwareWindow, RepaintBufferType, Rgb565Pixel};
-use hambooo::axp2101::{Axp2101, I2CInterface, I2CPowerManagementInterface};
+use axp2101::{Axp2101, I2CInterface, I2CPowerManagementInterface};
 
 slint::include_modules!();
 
@@ -141,7 +140,7 @@ fn main() -> ! {
 
     let i2c = I2C::new(peripherals.I2C1, i2c_sda, i2c_scl, 400u32.kHz(), &clocks, None);
 
-    /// To share i2c bus, see @ https://github.com/rust-embedded/embedded-hal/issues/35
+    // To share i2c bus, see @ https://github.com/rust-embedded/embedded-hal/issues/35
     let i2c_ref_cell = RefCell::new(i2c);
 
     unsafe {
@@ -313,7 +312,7 @@ impl Platform for Backend {
 
     // fn run_event_loop(&self) -> Result<(), slint::PlatformError>
     fn debug_log(&self, arguments: core::fmt::Arguments) {
-        // log::debug!("Slint: {:?}", arguments);
+        println!("Slint: {:?}", arguments);
     }
 }
 

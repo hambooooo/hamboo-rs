@@ -29,13 +29,14 @@ embedded-graphics = { version = "0.8.1" }
 embedded-hal = { version = "1.0.0" }
 embedded-hal-bus = { version = "0.1.0" }
 mipidsi = { git = "https://github.com/almindor/mipidsi", branch = "master" }
-#cst816s = { git = "https://github.com/thecodechemist99/cst816s", branch = "master" }
-slint = { version = "1.5.1", default-features = false, features = ["compat-1-0", "unsafe-single-threaded", "libm"] }
+cst816s = { git = "https://github.com/thecodechemist99/cst816s", branch = "master" }
+slint = { version = "1.6.0", default-features = false, features = ["compat-1-0", "unsafe-single-threaded", "libm"] }
 
+axp2101 = {git = "https://github.com/hambooooo/axp2101-rs", branch = "main"}
 pcf8563 = { git = "https://github.com/nebelgrau77/pcf8563-rs", branch = "embedded-hal-1" }
 
 [build-dependencies]
-slint-build = { version = "1.5.1" }
+slint-build = { version = "1.6.0" }
 
 [profile.dev]
 # Rust debug is too slow. 
