@@ -43,7 +43,7 @@ async fn main(spawner: Spawner) {
 
     unsafe {
         ALLOCATOR.init(HEAP.as_mut_ptr() as *mut u8, HEAP_SIZE);
-        log::trace!("heap initialized");
+        log::info!("heap initialized");
     }
 
     let peripherals = Peripherals::take();
@@ -55,7 +55,7 @@ async fn main(spawner: Spawner) {
         &clocks,
         hal::timer::TimerGroup::new_async(peripherals.TIMG0, &clocks),
     );
-    esp_println::println!("embassy::init embassy-time-timg0");
+    log::info!("embassy::init embassy-time-timg0");
 
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
     let cs = io.pins.gpio16.into_push_pull_output();

@@ -1,13 +1,23 @@
 import { Router, System } from "../global.slint";
 
-export component GoHome inherits Text {
+export component GoHome inherits Rectangle {
     z: 999;
-    x: 10px;
-    y: 10px;
-    font-size: 20px;
-    text: "✘";
-    color: white;
+    x: 0px;
+    y: 0px;
+    width: 50px;
+    height: 50px;
+    padding: 0px;
+    Text {
+        x:10px;
+        y:10px;
+        font-size: 20px;
+        text: "✘";
+        color: white;
+    }
     TouchArea {
+        moved => {
+            System.current-page = Router.Home;
+        }
         clicked => {
             System.current-page = Router.Home;
         }

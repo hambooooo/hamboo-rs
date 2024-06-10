@@ -29,7 +29,6 @@ use slint::platform::software_renderer::{
     RepaintBufferType,
     Rgb565Pixel,
 };
-use static_cell::make_static;
 
 slint::include_modules!();
 

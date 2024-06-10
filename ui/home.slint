@@ -2,7 +2,7 @@ import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-wid
 import { StatusBar } from "./status-bar.slint";
 import { Apps } from "./apps.slint";
 import { Settings } from "./settings.slint";
-import { Router, System } from "./global.slint";
+import { Router, Face, System } from "./global.slint";
 import { FaceHamboo } from "./face-hamboo.slint";
 import { Calculator } from "./calculator.slint";
 import "./fonts/simhei.ttf";
@@ -21,7 +21,7 @@ export component Home inherits Window {
         z: 1;
     }
     home := Rectangle {
-        FaceHamboo {}
+        if System.current-face == Face.Hamboo: FaceHamboo {}
         TouchArea {
             x: 0;
             property <bool> is_moved: false;

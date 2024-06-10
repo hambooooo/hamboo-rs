@@ -35,20 +35,20 @@ export component Apps inherits Rectangle {
     animate y, opacity {
         duration: self.animate_time;
     }
-    in property <[{name: string, icon: image, app: Router}]> model: [
-        {name: "表盘管理", icon: @image-url("images/app-watch.svg"), app: Router.Todo },
-        {name: "天气", icon: @image-url("images/app-weater.svg"), app: Router.Todo },
-        {name: "闹钟", icon: @image-url("images/app-clock.svg"), app: Router.Todo },
-        {name: "秒表", icon: @image-url("images/app-timer.svg"), app: Router.Todo },
-        {name: "NFC", icon: @image-url("images/app-nfc.svg"), app: Router.Todo },
-        {name: "运动健康", icon: @image-url("images/app-sports.svg"), app: Router.Todo },
-        {name: "指南针", icon: @image-url("images/app-compass.svg"), app: Router.Todo },
-        {name: "音乐", icon: @image-url("images/app-music.svg"), app: Router.Todo },
-        {name: "智能家居", icon: @image-url("images/app-house.svg"), app: Router.Todo },
-        {name: "计算器", icon: @image-url("images/app-calculate.svg"), app: Router.Calculator },
-        {name: "哔哩哔哩", icon: @image-url("images/app-bilibili.svg"), app: Router.Todo },
-        {name: "游戏中心", icon: @image-url("images/app-game.svg"), app: Router.Todo },
-        {name: "系统设置", icon: @image-url("images/app-settings.svg"), app: Router.Settings },
+    in property <[{name: string, app: Router, icon: image}]> model: [
+        { name: "表盘管理", app: Router.Todo, icon: @image-url("images/app-watch.svg") },
+        { name: "天气", app: Router.Todo, icon: @image-url("images/app-weater.svg") },
+        { name: "闹钟", app: Router.Todo, icon: @image-url("images/app-clock.svg") },
+        { name: "秒表", app: Router.Todo, icon: @image-url("images/app-timer.svg") },
+        { name: "NFC", app: Router.Todo, icon: @image-url("images/app-nfc.svg") },
+        { name: "运动健康", app: Router.Todo, icon: @image-url("images/app-sports.svg") },
+        { name: "指南针", app: Router.Todo, icon: @image-url("images/app-compass.svg") },
+        { name: "音乐", app: Router.Todo, icon: @image-url("images/app-music.svg") },
+        { name: "智能家居", app: Router.Todo, icon: @image-url("images/app-house.svg") },
+        { name: "计算器", app: Router.Calculator, icon: @image-url("images/app-calculate.svg") },
+        { name: "哔哩哔哩", app: Router.Todo, icon: @image-url("images/app-bilibili.svg") },
+        { name: "游戏中心", app: Router.Todo, icon: @image-url("images/app-game.svg") },
+        { name: "系统设置", app: Router.Settings, icon: @image-url("images/app-settings.svg") },
     ];
     flick-area := Flickable {
         viewport-height: (root.item-height + root.spacing) * root.model.length + root.spacing;
