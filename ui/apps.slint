@@ -26,6 +26,7 @@ export component Apps inherits Rectangle {
     property <physical-length> item-height: 60px;
     property <physical-length> spacing: 10px;
     property <float> item-with-ratio: 0.9;
+    out property <length> flick-y <=> flick-area.viewport-y;
     in property <[{name: string, icon: image}]> model: [
         {name: "表盘管理", icon: @image-url("images/app-watch.svg") },
         {name: "天气", icon: @image-url("images/app-weater.svg") },
@@ -41,7 +42,7 @@ export component Apps inherits Rectangle {
         {name: "游戏中心", icon: @image-url("images/app-game.svg") },
         {name: "系统设置", icon: @image-url("images/app-settings.svg") },
     ];
-    Flickable {
+    flick-area := Flickable {
         viewport-height: (root.item-height + root.spacing) * root.model.length + root.spacing;
         box := VerticalBox {
             y: root.spacing;

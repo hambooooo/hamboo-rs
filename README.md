@@ -24,9 +24,9 @@
 
 ### 📐 Blender modeling and 3d printing
 
-![blender.jpg](docs%2Fblender.jpg)
+![blender.jpg](docs/blender.jpg)
 
-[Hamboo-V4.blend](docs%2FHamboo-V4.blend)
+[Hamboo-V4.blend](docs/Hamboo-V4.blend)
 
 ### 🖥️ Circuit diagram & PCB
 

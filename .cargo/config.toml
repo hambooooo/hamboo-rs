@@ -1,13 +1,14 @@
 [target.xtensa-esp32s3-none-elf]
-runner = "espflash flash --flash-size 32mb --flash-mode dio --flash-freq 80mhz --partition-table partitions.csv --monitor "
-
+runner = "espflash flash --flash-size 32mb --partition-table partitions.csv --monitor"
 
 [env]
-ESP_LOGLEVEL="INFO"
+ESP_LOGLEVEL = "INFO"
 
 [build]
 rustflags = [
-  "-C", "link-arg=-nostartfiles",
+    "-C", "link-arg=-Tlinkall.x",
+#    "-C", "link-arg=-Trom_functions.x",
+#    "-C", "link-arg=-nostartfiles",
 ]
 
 target = "xtensa-esp32s3-none-elf"

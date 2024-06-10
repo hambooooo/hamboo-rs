@@ -2,21 +2,12 @@ import { GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
 import { Slider } from "./compontents/slider.slint";
 import { Button } from "./compontents/button.slint";
 import { Battary } from "./compontents/battary.slint";
-
+import { Router, Battery, DateTime, System } from "./global.slint";
 
 export component StatusBar inherits Rectangle {
     width: 240px;
     height: 280px;
     background: lightgrey;
-    in property <int> battery-percent;
-    in property <bool> battery-charging;
-    in property <int> date-year;
-    in property <int> date-month;
-    in property <int> date-weekday;
-    in property <int> date-day;
-    in property <int> time-hours;
-    in property <int> time-minutes;
-    in property <int> time-seconds;
     property <color> fond-color: white;
     property <color> back-color: #999;
     VerticalBox {
@@ -27,11 +18,11 @@ export component StatusBar inherits Rectangle {
             Text {
                 color: black;
                 font-weight: 500;
-                text: @tr("{}月{}日 周{} {}:{}", root.date-month, root.date-day, root.date-weekday, root.time-hours, root.time-minutes);
+                text: @tr("{}月{}日 周{} {}:{}", DateTime.month, DateTime.day, DateTime.weekday + 1, DateTime.hours, DateTime.minutes);
             }
             Battary {
-                value: root.battery-percent;
-                charging: root.battery-charging;
+                value: Battery.percent;
+                charging: Battery.charging;
             }
         }
         Rectangle {
@@ -57,6 +48,9 @@ export component StatusBar inherits Rectangle {
                      height: button-size;
                      width: button-size;
                      icon: @image-url("images/icon-settings.svg");
+                     clicked => {
+                        System.current-page = Router.Settings;
+                     }
                  }
             }
         }
@@ -69,6 +63,9 @@ export component StatusBar inherits Rectangle {
                 x: 20px;
                 width: 20px;
                 source: @image-url("./images/icon-brightness.svg");
+            }
+            on-value-change(value) => {
+                System.brightness-change(value);
             }
         }
         Slider {

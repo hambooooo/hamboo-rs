@@ -1,0 +1,45 @@
+import { DateTime } from "./global.slint";
+
+export component FaceHamboo inherits Rectangle {
+    Image {
+        height: root.height;
+        width: root.width;
+        source: @image-url("./images/hamboo.jpg");
+        date := Text {
+            x: root.width - self.width - 5px;
+            y: (root.height - self.height) / 7;
+            text: @tr("{}th Apr", DateTime.month);
+            font-size: 20px;
+            color: gold;
+        }
+        Rectangle{
+            x: 120px;
+            y: 50px;
+            width: 140px;
+            height: 60px;
+            hours := Text {
+                x: 0px;
+                text: DateTime.hours;
+                font-size: 45px;
+                font-weight: 800;
+                color: #fff;
+            }
+            seconds := Text {
+                x: hours.width + 2px;
+                y: (parent.height - self.height) / 2  - 2px;
+                text: ":";
+                font-size: 40px;
+                font-weight: 700;
+                color: #fff;
+            }
+            minutes := Text {
+                x: seconds.x + seconds.width + 2px;
+                text: DateTime.minutes;
+                font-size: 45px;
+                font-weight: 800;
+                color: #fff;
+            }
+        }
+    }
+    @children
+}

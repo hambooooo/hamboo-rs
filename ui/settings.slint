@@ -5,7 +5,77 @@ import { Button } from "./compontents/button.slint";
 export component Settings inherits Rectangle {
     width: 240px;
     height: 280px;
+    property <int> state : 1;
     VerticalBox {
+        visible: root.state == 1;
+        Button {
+            text: "设置日期";
+            clicked => {
+                root.state = 2;
+            }
+        }
+        Button {
+            text: "设置时间";
+            clicked => {
+               root.state = 3;
+            }
+        }
+        Button {
+           text: "关于";
+           clicked => {
+              root.state = 4;
+           }
+        }
+    }
+    HorizontalBox {
+        visible: root.state == 2;
+        Text {
+            text: "24";
+        }
+        Text {
+            text: "06";
+        }
+        Text {
+            text: "09";
+        }
+        Button {
+            text: "确定";
+            clicked => {
+                // todo 修改系统日期
+                root.state = 1;
+            }
+        }
+    }
+    HorizontalBox {
+        visible: root.state == 3;
+        Text {
+            text: "12";
+        }
+        Text {
+            text: "00";
+        }
+        Button {
+            text: "确定";
+            clicked => {
+                // todo 修改系统时间
+                root.state = 1;
+            }
+        }
+    }
+    VerticalBox {
+        visible: root.state == 4;
+        Text {
+            text: "版本号：0.1.0-20240609001";
+        }
+        Text {
+            text: "仓库地址：https://github.com/hamboooo/hamboo-rs";
+        }
+        Button {
+            text: "确定";
+            clicked => {
+                root.state = 1;
+            }
+        }
     }
     @children
 
