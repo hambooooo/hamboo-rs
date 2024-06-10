@@ -1,0 +1,25 @@
+export component Button inherits Rectangle {
+    in-out property text <=> txt.text;
+    in-out property <physical-length> font-size;
+    in-out property <image> icon;
+    in-out property <float> icon-rate : 0.5;
+    in-out property <color> font-color : black;
+    callback clicked <=> touch.clicked;
+    border-radius: root.height / 8;
+    border-width: 1px;
+    border-color: root.background.darker(25%);
+    background: touch.pressed ? #aaa : touch.has-hover ? #ddd : #fff;
+    height: txt.preferred-height * 1.33;
+    min-width: txt.preferred-width + 20px;
+    txt := Text {
+        x: (parent.width - self.width) / 2 + (touch.pressed ? 2px : 0);
+        y: (parent.height - self.height) / 2 + (touch.pressed ? 1px : 0);
+        font-size: root.font-size;
+        color: font-color;
+    }
+    Image {
+        width: parent.width * icon-rate;
+        source: icon;
+    }
+    touch := TouchArea { }
+}

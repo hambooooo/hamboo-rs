@@ -1,0 +1,46 @@
+import { VerticalBox } from "std-widgets.slint";
+
+export component Slider inherits Rectangle {
+    in-out property<float> maximum: 100;
+    in-out property<float> minimum: 0;
+    in-out property<float> value;
+    callback on-value-change(float);
+
+    min-height: 24px;
+    min-width: 100px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    border-radius: root.height/2;
+    background: #eee;
+    border-width: 1px;
+    border-color: root.background.darker(5%);
+
+    handle := Rectangle {
+        x: 0;
+        height: parent.height;
+        border-width: 1px;
+        border-top-left-radius: self.height / 2;
+        border-bottom-left-radius: self.height / 2;
+        border-top-right-radius: (self.height / 2) - (root.width - self.width);
+        border-bottom-right-radius: (self.height / 2) - (root.width - self.width);
+        background: #fff;
+        border-color: #fff;
+        width: root.width * (root.value - root.minimum)/(root.maximum - root.minimum);
+    }
+    @children
+    touch := TouchArea {
+        property <float> pressed-value;
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                self.pressed-value = root.value;
+            }
+        }
+        moved => {
+            if (self.enabled && self.pressed) {
+                root.value = max(root.minimum, min(root.maximum, self.pressed-value + (touch.mouse-x - touch.pressed-x) * (root.maximum - root.minimum) / root.width));
+                root.on-value-change(root.value);
+            }
+        }
+    }
+}
