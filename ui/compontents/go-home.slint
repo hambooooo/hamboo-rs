@@ -1,0 +1,15 @@
+import { Router, System } from "../global.slint";
+
+export component GoHome inherits Text {
+    z: 999;
+    x: 10px;
+    y: 10px;
+    font-size: 20px;
+    text: "✘";
+    color: white;
+    TouchArea {
+        clicked => {
+            System.current-page = Router.Home;
+        }
+     }
+}

@@ -10,6 +10,11 @@ export component StatusBar inherits Rectangle {
     background: lightgrey;
     property <color> fond-color: white;
     property <color> back-color: #999;
+    property <bool> moved: false;
+    in-out property <duration> animate_time : 0;
+    animate y, opacity {
+        duration: self.animate_time;
+    }
     VerticalBox {
         property <physical-length> button-size: 45px;
         HorizontalLayout {
@@ -164,6 +169,23 @@ export component StatusBar inherits Rectangle {
                         color: root.fond-color;
                     }
                 }
+            }
+        }
+    }
+    TouchArea {
+        z: -1;
+        moved => {
+            if (self.pressed_y - self.mouse_y > (self.pressed_x > self.mouse_x ? self.pressed_x - self.mouse_x : self.mouse_x - self.pressed_x) + 10px) {
+                root.moved = true;
+            }
+        }
+        pointer-event(event) => {
+            if (event.kind == PointerEventKind.up && root.moved) {
+                root.animate_time = 200ms;
+                root.moved = false;
+                root.y = root.height * -1;
+                root.visible = false;
+                System.current-page = Router.Home;
             }
         }
     }

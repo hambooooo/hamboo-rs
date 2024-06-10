@@ -1,79 +1,89 @@
 import { GridBox, Slider, HorizontalBox, VerticalBox } from "std-widgets.slint";
 import { Slider } from "./compontents/slider.slint";
 import { Button } from "./compontents/button.slint";
+import { GoHome } from "./compontents/go-home.slint";
 
 export component Settings inherits Rectangle {
     width: 240px;
     height: 280px;
-    property <int> state : 1;
-    VerticalBox {
-        visible: root.state == 1;
+    property <int> active-table : 1;
+    background: black;
+    GoHome {}
+    if root.active-table == 1 : VerticalBox {
+        padding-top: 40px;
         Button {
             text: "设置日期";
             clicked => {
-                root.state = 2;
+                root.active-table = 2;
             }
         }
         Button {
             text: "设置时间";
             clicked => {
-               root.state = 3;
+               root.active-table = 3;
             }
         }
         Button {
            text: "关于";
            clicked => {
-              root.state = 4;
+              root.active-table = 4;
            }
         }
     }
-    HorizontalBox {
-        visible: root.state == 2;
+    if root.active-table == 2 : HorizontalBox {
+        padding-top: 40px;
         Text {
             text: "24";
+            color: white;
         }
         Text {
             text: "06";
+            color: white;
         }
         Text {
             text: "09";
+            color: white;
         }
         Button {
             text: "确定";
             clicked => {
                 // todo 修改系统日期
-                root.state = 1;
+                root.active-table = 1;
             }
         }
     }
-    HorizontalBox {
-        visible: root.state == 3;
+    if root.active-table == 3 : HorizontalBox {
+        padding-top: 40px;
         Text {
             text: "12";
+            color: white;
         }
         Text {
             text: "00";
+            color: white;
         }
         Button {
             text: "确定";
             clicked => {
                 // todo 修改系统时间
-                root.state = 1;
+                root.active-table = 1;
             }
         }
     }
-    VerticalBox {
-        visible: root.state == 4;
+    if root.active-table == 4 : VerticalBox {
+        padding-top: 40px;
         Text {
             text: "版本号：0.1.0-20240609001";
+            color: white;
         }
         Text {
             text: "仓库地址：https://github.com/hamboooo/hamboo-rs";
+            color: white;
         }
         Button {
             text: "确定";
             clicked => {
-                root.state = 1;
+                root.active-table = 1;
             }
         }
     }

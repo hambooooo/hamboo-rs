@@ -1,0 +1,229 @@
+import { VerticalBox, HorizontalBox , GridBox} from "std-widgets.slint";
+import { GoHome } from "./compontents/go-home.slint";
+
+export global CalcLogic {
+    callback button-pressed(string);
+}
+
+component ButtonNum inherits Rectangle {
+    in-out property text <=> txt.text;
+    callback clicked <=> touch.clicked;
+    border-radius: self.height * 0.2;
+    border-width: 3px;
+    border-color: black;
+    background: touch.pressed ? #9E9FA0 : #5E5F61;
+    txt := Text {
+        color: touch.pressed ? #fff : #eee;
+        font-size: 20px;
+    }
+
+    touch := TouchArea { }
+}
+
+component ButtonArth inherits Rectangle {
+    in-out property text <=> txt.text;
+    callback clicked;
+    property <bool> actived: false;
+    border-radius: self.height * 0.2;
+    border-width: 3px;
+    border-color: black;
+    background: touch.pressed ? #CB7D06 : root.actived ? white : #F2A33C;
+    txt := Text {
+        color: touch.pressed ? #fff : root.actived ? #CB7D06 : white;
+        font-size: 20px;
+    }
+
+    touch := TouchArea {
+        clicked => {
+            root.actived = !root.actived;
+            root.clicked();
+        }
+    }
+}
+
+component ButtonMath inherits Rectangle {
+    in-out property text <=> txt.text;
+    callback clicked <=> touch.clicked;
+    border-radius: self.height * 0.2;
+    border-width: 3px;
+    border-color: black;
+    background: touch.pressed ? white : #bbb;
+    txt := Text {
+        color: black;
+        font-size: 20px;
+    }
+
+    touch := TouchArea { }
+}
+
+export component Calculator inherits Rectangle {
+    width: 240px;
+    height: 280px;
+    background: black;
+    in-out property <float> result: 0;
+    in-out property <length> font-size: 45px;
+    in-out property <string> clr: "AC";
+    GoHome { }
+
+    GridLayout {
+        spacing: 0px;
+        padding: 0px;
+        Row {
+            result := Text {
+                horizontal-alignment: right;
+                vertical-alignment: bottom;
+                colspan: 4;
+                height: 80px;
+                font-family: "SFUI Display";
+                font-size: root.font-size;
+                text: root.result;
+                color: white;
+            }
+        }
+
+        Row {
+            ButtonMath {
+                text: root.clr;
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonMath {
+                text: "+/-";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonMath {
+                text: "%";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonArth {
+                text: "÷";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+        }
+
+        Row {
+            ButtonNum {
+                text: "7";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonNum {
+                text: "8";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonNum {
+                text: "9";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonArth {
+                text: "x";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+        }
+
+        Row {
+            ButtonNum {
+                text: "4";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonNum {
+                text: "5";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonNum {
+                text: "6";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonArth {
+                text: "−";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+        }
+
+        Row {
+            ButtonNum {
+                text: "1";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonNum {
+                text: "2";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonNum {
+                text: "3";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonArth {
+                text: "+";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+        }
+
+        Row {
+            ButtonNum {
+                text: "0";
+                colspan: 2;
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonNum {
+                text: ".";
+                col: 2;
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+
+            ButtonArth {
+                text: "=";
+                clicked => {
+                    CalcLogic.button-pressed(self.text);
+                }
+            }
+        }
+    }
+}

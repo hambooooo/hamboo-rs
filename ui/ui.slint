@@ -4,124 +4,21 @@ import { Apps } from "./apps.slint";
 import { Settings } from "./settings.slint";
 import { Router, Battery, DateTime, System } from "./global.slint";
 import { FaceHamboo } from "./face-hamboo.slint";
+import { Calculator } from "./calculator.slint";
+import { Home } from "./home.slint";
+import { Todo } from "./todo.slint";
 import "./fonts/simhei.ttf";
 
 export { Router, Battery, DateTime, System }
 
 export component UI inherits Window {
     default-font-family: "黑体";
-    width: 240px;
-    height: 280px;
-    in property <bool> datetime_show : true;
-    status_bar := StatusBar {
-        property <bool> moved: false;
-        property <duration> animate_time : 0;
-        visible: false;
-        y: root.height * -1;
-        z: 1;
-        animate y, opacity {
-            duration: self.animate_time;
-        }
-        TouchArea {
-            z: -1;
-            moved => {
-                if (self.pressed_y - self.mouse_y > (self.pressed_x > self.mouse_x ? self.pressed_x - self.mouse_x : self.mouse_x - self.pressed_x) + 10px) {
-                    home.visible = false;
-                    status-bar.moved = true;
-                    home.opacity = (root.height - self.mouse_y) / root.height;
-                }
-            }
-            pointer-event(event) => {
-                if (event.kind == PointerEventKind.up && status-bar.moved) {
-                    status-bar.animate_time = 200ms;
-                    status-bar.moved = false;
-                    status-bar.y = root.height * -1;
-                    home.visible = true;
-                    status-bar.opacity = 0;
-                    home.opacity = 1;
-                }
-            }
-        }
-    }
-    apps := Apps {
-        property <duration> animate_time : 0;
-        property <bool> is_moved: false;
-        visible: false;
-        y: root.height;
-        z: 1;
-        animate y, opacity {
-            duration: self.animate_time;
-        }
-        TouchArea {
-            x: 0;
-            y: 0;
-            width: 100%;
-            height: 20%;
-            z: 1;
-            moved => {
-                if (parent.flick-y == 0 && self.mouse_y - self.pressed_y > 10px) {
-                    home.visible = true;
-                    home.opacity = 1;
-                    parent.visible = false;
-                    parent.is_moved = true;
-                }
-            }
-        }
-    }
-    home := FaceHamboo {
-        TouchArea {
-            x: 0;
-            property <bool> is_moved: false;
-            property <int> moved_direction: 1;
-            moved => {
-                if (self.pressed_y < 50px) {
-                    status-bar.visible = true;
-                    status-bar.opacity = 1;
-                    status-bar.animate_time = 0;
-                    status-bar.y = self.mouse_y - root.height;
-                    self.is_moved = true;
-                    self.moved_direction = 1;
-                }
-                if (self.pressed_y > root.height - 50px) {
-                    apps.visible = true;
-                    apps.opacity = 1;
-                    apps.animate_time = 0;
-                    apps.y = self.mouse_y;
-                    self.is_moved = true;
-                    self.moved_direction = 2;
-                }
-            }
-            pointer-event(event) => {
-                if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 1) {
-                    self.is_moved = false;
-                    status-bar.animate_time = 200ms;
-                    if (self.mouse_y < root.height / 2) {
-                        status-bar.y = root.height * -1;
-                        status-bar.opacity = 0;
-                        home.visible = true;
-                        home.opacity = 1;
-                    } else {
-                        status-bar.y = 0px;
-                        home.visible = false;
-                    }
-                }
-                if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 2) {
-                    self.is_moved = false;
-                    apps.animate_time = 200ms;
-                    if (self.mouse_y > root.height / 2) {
-                        apps.y = root.height;
-                        apps.opacity = 0;
-                        home.visible = true;
-                        home.opacity = 1;
-                    } else {
-                        apps.y = 0px;
-                        home.visible = false;
-                    }
-                }
-            }
-        }
-    }
-    settings:= Settings {
-        visible: System.current-page == Router.Settings;
-    }
+    width: System.screen-width;
+    height: System.screen-height;
+    if System.current-page == Router.Home : Home { }
+    if System.current-page == Router.StatusBar : StatusBar { }
+    if System.current-page == Router.Apps : Apps { }
+    if System.current-page == Router.Settings : Settings { }
+    if System.current-page == Router.Calculator : Calculator { }
+    if System.current-page == Router.Todo : Todo { }
 }
