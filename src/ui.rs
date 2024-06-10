@@ -29,6 +29,7 @@ use slint::platform::software_renderer::{
     RepaintBufferType,
     Rgb565Pixel,
 };
+use static_cell::make_static;
 
 slint::include_modules!();
 
@@ -124,10 +125,16 @@ pub async fn run(
     // 定时更新UI日期时间
     let datetime_timer = slint::Timer::default();
     update_datetime(&mut rtc, ui.as_weak());
-    let app_weak = ui.as_weak();
+    let ui_weak = ui.as_weak();
     datetime_timer.start(slint::TimerMode::Repeated, core::time::Duration::from_secs(1), move || {
-        update_datetime(&mut rtc, app_weak.clone());
+        update_datetime(&mut rtc, ui_weak.clone());
     });
+
+    // // 延迟亮屏过滤花屏
+    // let bl_timer = slint::Timer::default();
+    // bl_timer.start(slint::TimerMode::SingleShot, core::time::Duration::from_secs(1), move || {
+    //     bl_pwm_pin.set_timestamp(50);
+    // });
 
     // 控制屏幕亮度
     ui.global::<System>().on_brightness_change(move |value| {

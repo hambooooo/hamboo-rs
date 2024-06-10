@@ -5,7 +5,7 @@
     <img alt="License-MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"/>
     <img alt="License-Apache" src="https://img.shields.io/badge/license-apache-blue.svg"/>
     <img alt="esp-hal" src="https://img.shields.io/badge/esp_hal-0.17.0-green.svg"/>
-    <img alt="Slint" src="https://img.shields.io/badge/slint-1.5.1-green.svg"/>
+    <img alt="Slint" src="https://img.shields.io/badge/slint-1.6.0-green.svg"/>
 </p>
 
 <img alt="Hamboo" src="docs/watch.jpg"/>
@@ -26,18 +26,18 @@
 
 ![blender.jpg](docs/blender.jpg)
 
-[Hamboo-V4.blend](docs/Hamboo-V4.blend)
+[Hamboo-V6.blend](docs/Hamboo-V6.blend)
 
 ### 🖥️ Circuit diagram & PCB
 
 <div>
-<img width="49%" height="350" src="docs/circuit-diagram.png"/>
-<img width="49%" height="350" src="docs/PCB.png"/>
-<img width="49%" height="350" src="docs/PCB-3D-A.png"/>
-<img width="49%" height="350" src="docs/PCB-3D-B.png"/>
+    <img width="49%" height="350" src="docs/circuit-diagram.png"/>
+    <img width="49%" height="350" src="docs/PCB.png"/>
+    <img width="49%" height="350" src="docs/PCB-3D-A.png"/>
+    <img width="49%" height="350" src="docs/PCB-3D-B.png"/>
 </div>
 
-[hamboo-pcb.zip](docs%2Fhamboo-pcb.zip)
+[hamboo-pcb.zip](docs/hamboo-pcb.zip)
 
 ## 💰 Cost & 🎧Peripheral
 
@@ -60,6 +60,11 @@
 </div>
 
 ## ⌨️ hamboo-rs
+
+<div>
+    <img width="56%" src="docs/hamboo-ui.gif" />
+    <img width="43%" src="docs/hamboo-slint.gif" />
+</div>
 
 ### 🎬 Getting Start
 
