@@ -23,7 +23,7 @@ export component StatusBar inherits Rectangle {
             Text {
                 color: black;
                 font-weight: 500;
-                text: @tr("{}月{}日 周{} {}:{}", DateTime.month, DateTime.day, DateTime.weekday + 1, DateTime.hours, DateTime.minutes);
+                text: @tr("{}月{}日 周{} {}:{}", DateTime.month, DateTime.day, DateTime.weekday_cn, DateTime.hours, DateTime.minutes);
             }
             Battary {
                 value: Battery.percent;

@@ -35,4 +35,8 @@ export global DateTime {
     in property <int> hours: 12;
     in property <int> minutes: 0;
     in property <int> seconds: 0;
+
+    property <[string]> WEEKDAYS_CN : ["一", "二", "三", "四", "五", "六", "日"];
+
+    out property <string> weekday_cn : WEEKDAYS_CN[weekday];
 }

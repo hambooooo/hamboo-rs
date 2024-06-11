@@ -8,7 +8,7 @@ export component FaceHamboo inherits Rectangle {
         date := Text {
             x: root.width - self.width - 5px;
             y: (root.height - self.height) / 7;
-            text: @tr("{}月{}日 星期{}", DateTime.month, DateTime.day, DateTime.weekday + 1);
+            text: @tr("{}月{}日 星期{}", DateTime.month, DateTime.day, DateTime.weekday_cn);
             font-size: 13px;
             color: white;
         }
