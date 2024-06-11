@@ -1,0 +1,22 @@
+import { DateTime } from "./global.slint";
+
+export component FaceDigital inherits Rectangle {
+    width: 240px;
+    height: 280px;
+    background: black;
+    property <physical-length> font-size : 120px;
+    Text {
+        y: root.height / 2 - self.height / 10 * 9;
+        text: DateTime.hours;
+        font-size: font-size;
+        font-weight: 800;
+        color: #8fbc8f;
+    }
+    Text {
+        y: root.height / 2 - self.height / 10;
+        text: DateTime.minutes;
+        font-size: font-size;
+        font-weight: 800;
+        color: #9370b9;
+    }
+}

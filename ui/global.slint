@@ -7,22 +7,19 @@ export enum Router {
     Todo
 }
 
-export enum Face {
-    Hamboo,
-    Digital
-}
-
 export global System {
     in property <length> screen-width: 240px;
     in property <length> screen-height: 280px;
     in-out property <Router> current-page: Home;
-    in-out property <Face> current-face: Hamboo;
+    in-out property <int> current-face-id: 0;
     in-out property <bool> wifi-enable: false;
     in-out property <bool> bluetools-enable: false;
     in-out property <int> brightness: 50;
     in-out property <int> volume: 30;
 
     pure callback brightness-change(int);
+    // year, month, weekday, day, hours, minutes, seconds
+    pure callback set-datetime(int, int, int, int, int, int, int);
 }
 
 export global Battery {

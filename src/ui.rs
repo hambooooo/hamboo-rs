@@ -1,5 +1,7 @@
 use alloc::boxed::Box;
 use alloc::rc::Rc;
+use alloc::sync::Arc;
+use core::ops::DerefMut;
 
 use axp2101::{Axp2101, I2CInterface};
 use cst816s::CST816S;
@@ -18,9 +20,10 @@ use esp_hal::peripherals::{I2C1, MCPWM0, SPI3};
 use esp_hal::spi::FullDuplexMode;
 use esp_hal::spi::master::Spi;
 use esp_hal::systimer::SystemTimer;
+use esp_println::println;
 use mipidsi::Display;
 use mipidsi::models::ST7789;
-use pcf8563::PCF8563;
+use pcf8563::{DateTime as Datetime, PCF8563};
 use slint::{LogicalPosition, Weak};
 use slint::platform::{PointerEventButton, WindowEvent};
 use slint::platform::software_renderer::{
@@ -29,6 +32,7 @@ use slint::platform::software_renderer::{
     RepaintBufferType,
     Rgb565Pixel,
 };
+use spin::Mutex;
 
 slint::include_modules!();
 
@@ -97,8 +101,8 @@ pub async fn run(
     display: Display<SPIInterface<ExclusiveDevice<Spi<'static, SPI3, FullDuplexMode>, GpioPin<Output<PushPull>, 16>, Delay>, GpioPin<Output<PushPull>, 17>>, ST7789, GpioPin<Output<PushPull>, 13>>,
     mut touch: CST816S<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>, GpioPin<Input<PullUp>, 9>, GpioPin<Output<PushPull>, 10>>,
     mut axp2101: Axp2101<I2CInterface<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>>>,
-    mut rtc: PCF8563<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>>,
-    mut bl_pwm_pin: PwmPin<'static, GpioPin<Output<PushPull>, 18>, MCPWM0, 0, true>
+    rtc: PCF8563<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>>,
+    mut bl_pwm_pin: PwmPin<'static, GpioPin<Output<PushPull>, 18>, MCPWM0, 0, true>,
 ) {
     let mut buffer_provider = DrawBuffer {
         display,
@@ -122,11 +126,30 @@ pub async fn run(
     });
 
     // 定时更新UI日期时间
+    let rtc = Arc::new(Mutex::new(rtc));
+    let rtc_cloned = rtc.clone();
     let datetime_timer = slint::Timer::default();
-    update_datetime(&mut rtc, ui.as_weak());
+    update_datetime(rtc_cloned.lock().deref_mut(), ui.as_weak());
     let ui_weak = ui.as_weak();
+    let rtc_cloned = rtc.clone();
     datetime_timer.start(slint::TimerMode::Repeated, core::time::Duration::from_secs(1), move || {
-        update_datetime(&mut rtc, ui_weak.clone());
+        update_datetime(rtc_cloned.lock().deref_mut(), ui_weak.clone());
+    });
+
+    // 修改时间
+    let rtc_cloned = rtc.clone();
+    ui.global::<System>().on_set_datetime(move |year, month, weekday, day, hours, minutes, seconds| {
+        let new_datetime = Datetime {
+            year: year as u8,
+            month: month as u8,
+            weekday: weekday as u8,
+            day: day as u8,
+            hours: hours as u8,
+            minutes: minutes as u8,
+            seconds: seconds as u8,
+        };
+        println!("{:#?}", new_datetime);
+        rtc_cloned.lock().deref_mut().set_datetime(&new_datetime).expect("Set datetime error");
     });
 
     // // 延迟亮屏过滤花屏
@@ -224,13 +247,13 @@ fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ui
             match rtc.get_datetime() {
                 Ok(date_time) => {
                     // println!("Current datetime ==> {:#?}", date_time);
-                    ui.global::<DateTime>().set_year(date_time.year.into());
-                    ui.global::<DateTime>().set_month(date_time.month.into());
-                    ui.global::<DateTime>().set_weekday(date_time.weekday.into());
-                    ui.global::<DateTime>().set_day(date_time.day.into());
-                    ui.global::<DateTime>().set_hours(date_time.hours.into());
-                    ui.global::<DateTime>().set_minutes(date_time.minutes.into());
-                    ui.global::<DateTime>().set_seconds(date_time.seconds.into());
+                    ui.global::<DateTime>().set_year(if date_time.year > 99 { 0 } else {date_time.year.into()});
+                    ui.global::<DateTime>().set_month(if date_time.month < 1 || date_time.month > 12  { 1 } else {date_time.month.into()});
+                    ui.global::<DateTime>().set_weekday(if date_time.weekday > 6  { 0 } else {date_time.weekday.into()});
+                    ui.global::<DateTime>().set_day(if date_time.day < 1 || date_time.day > 31  { 1 } else {date_time.day.into()});
+                    ui.global::<DateTime>().set_hours(if date_time.hours > 23  { 0 } else {date_time.hours.into()});
+                    ui.global::<DateTime>().set_minutes(if date_time.minutes > 59  { 0 } else {date_time.minutes.into()});
+                    ui.global::<DateTime>().set_seconds(if date_time.seconds > 59  { 0 } else {date_time.seconds.into()});
                 }
                 Err(_) => {}
             };

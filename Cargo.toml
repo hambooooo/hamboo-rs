@@ -64,6 +64,8 @@ pcf8563 = { git = "https://github.com/nebelgrau77/pcf8563-rs", branch = "embedde
 
 slint = { version = "1.6.0", default-features = false, features = ["compat-1-0", "libm", "unsafe-single-threaded"] }
 
+spin = "0.9.8"
+
 [build-dependencies]
 slint-build = "1.6.0"
 

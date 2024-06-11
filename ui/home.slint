@@ -2,12 +2,14 @@ import { Button, GridBox, VerticalBox, HorizontalBox, AboutSlint } from "std-wid
 import { StatusBar } from "./status-bar.slint";
 import { Apps } from "./apps.slint";
 import { Settings } from "./settings.slint";
-import { Router, Face, System } from "./global.slint";
+import { Router, System } from "./global.slint";
 import { FaceHamboo } from "./face-hamboo.slint";
+import { FaceDigital } from "./face-digital.slint";
+import { FacePointer } from "./face-pointer.slint";
 import { Calculator } from "./calculator.slint";
 import "./fonts/simhei.ttf";
 
-export component Home inherits Window {
+export component Home inherits Rectangle {
     width: 240px;
     height: 280px;
     status_bar := StatusBar {
@@ -21,7 +23,10 @@ export component Home inherits Window {
         z: 1;
     }
     home := Rectangle {
-        if System.current-face == Face.Hamboo: FaceHamboo {}
+        if System.current-face-id == 0: FaceHamboo {}
+        if System.current-face-id == 1: FaceDigital {}
+        if System.current-face-id == 2: FacePointer {}
+
         TouchArea {
             x: 0;
             property <bool> is_moved: false;
@@ -35,13 +40,21 @@ export component Home inherits Window {
                     self.is_moved = true;
                     self.moved_direction = 1;
                 }
-                if (self.pressed_y > root.height - 50px) {
+                else if (self.pressed_y > root.height - 50px) {
                     apps.visible = true;
                     apps.opacity = 1;
                     apps.animate_time = 0;
                     apps.y = self.mouse_y;
                     self.is_moved = true;
                     self.moved_direction = 2;
+                }
+                else if (self.pressed_x - self.mouse_x > (self.pressed_y > self.mouse_y ? self.pressed_y - self.mouse_y : self.mouse_y - self.pressed_y) + 50px) {
+                    self.is_moved = true;
+                    self.moved_direction = 3;
+                }
+                else if (self.mouse_x - self.pressed_x > (self.pressed_y > self.mouse_y ? self.pressed_y - self.mouse_y : self.mouse_y - self.pressed_y) + 50px) {
+                    self.is_moved = true;
+                    self.moved_direction = 4;
                 }
             }
             pointer-event(event) => {
@@ -68,6 +81,14 @@ export component Home inherits Window {
                     } else {
                         apps.y = 0px;
                     }
+                }
+                if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 3) {
+                    System.current-face-id += 1;
+                    System.current-face-id = System.current-face-id > 2 ? 0 : System.current-face-id;
+                }
+                if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 4) {
+                    System.current-face-id -= 1;
+                    System.current-face-id = System.current-face-id < 0 ? 2 : System.current-face-id;
                 }
             }
         }
