@@ -23,7 +23,9 @@ export component StatusBar inherits Rectangle {
             Text {
                 color: black;
                 font-weight: 500;
-                text: @tr("{}月{}日 周{} {}:{}", DateTime.month, DateTime.day, DateTime.weekday_cn, DateTime.hours, DateTime.minutes);
+                // DateTime.weekday_cn not work ???
+                property <[string]> WEEKDAYS_CN: ["一", "二", "三", "四", "五", "六", "日"];
+                text: @tr("{}月{}日 周{} {}:{}", DateTime.month, DateTime.day, WEEKDAYS_CN[DateTime.weekday], DateTime.hours, DateTime.minutes);
             }
             Battary {
                 value: Battery.percent;
