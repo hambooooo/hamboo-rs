@@ -15,13 +15,13 @@ export component FaceHamboo inherits Rectangle {
             color: white;
         }
         Rectangle{
-            x: 120px;
+            x: 100px;
             y: 50px;
             width: 140px;
             height: 60px;
             hours := Text {
                 x: 0px;
-                text: DateTime.hours;
+                text: DateTime.hours< 10 ? "0" + DateTime.hours : DateTime.hours;
                 font-size: 45px;
                 font-weight: 800;
                 color: #fff;
@@ -36,7 +36,7 @@ export component FaceHamboo inherits Rectangle {
             }
             minutes := Text {
                 x: seconds.x + seconds.width + 2px;
-                text: DateTime.minutes;
+                text: DateTime.minutes< 10 ? "0" + DateTime.minutes : DateTime.minutes;
                 font-size: 45px;
                 font-weight: 800;
                 color: #fff;

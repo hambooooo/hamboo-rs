@@ -38,7 +38,7 @@ static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
 async fn main(spawner: Spawner) {
     esp_println::logger::init_logger(log::LevelFilter::Debug);
 
-    const HEAP_SIZE: usize = 128 * 1024;
+    const HEAP_SIZE: usize = 256 * 1024;
     static mut HEAP: MaybeUninit<[u8; HEAP_SIZE]> = MaybeUninit::uninit();
 
     unsafe {
