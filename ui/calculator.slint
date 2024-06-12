@@ -1,13 +1,70 @@
 import { VerticalBox, HorizontalBox , GridBox} from "std-widgets.slint";
 import { GoHome } from "./compontents/go-home.slint";
 
+enum  KeyType {
+    Action,
+    Num,
+    Opt
+}
+
 export global CalcLogic {
-    callback button-pressed(string);
+    out property <bool> switched : false;
+    out property <string> crt-item : "0";
+    out property <string> crt-opt : "+";
+    out property <string> result : "0";
+    out property <string> result-display : "0";
+    out property <string> temp-display;
+    out property <KeyType> last-keytype : KeyType.Num;
+
+    public function calc(opt: string) {
+        if (crt-opt == "+") {
+            result = result.to-float() + crt-item.to-float();
+        }
+        if (crt-opt == "−") {
+            result = result.to-float() - crt-item.to-float();
+        }
+        if (crt-opt == "x") {
+            result = result.to-float() * crt-item.to-float();
+        }
+        if (crt-opt == "÷") {
+            result = result.to-float() / crt-item.to-float();
+        }
+        crt-opt = opt;
+        crt-item = 0;
+    }
+
+    public function button-pressed(key: string, type: KeyType) {
+        if (key == "AC") {
+            result = "0";
+            result-display = "0";
+            temp-display = "";
+            last-keytype = KeyType.Num;
+            crt-item = "0";
+            crt-opt = "+";
+        }
+        else if (type == KeyType.Opt) {
+            if (last-keytype == type) {
+                crt-opt = key;
+            } else {
+                temp-display += crt-item.to-float();
+                calc(key);
+            }
+            result-display = temp-display + crt-opt;
+        }
+        else {
+            if (last-keytype != type && temp-display != "") {
+                temp-display += crt-opt;
+            }
+            crt-item += key;
+            result-display = temp-display + crt-item.to-float();
+        }
+
+        last-keytype = type;
+    }
 }
 
 component ButtonNum inherits Rectangle {
     in-out property text <=> txt.text;
-    callback clicked <=> touch.clicked;
     border-radius: self.height * 0.2;
     border-width: 3px;
     border-color: black;
@@ -16,13 +73,15 @@ component ButtonNum inherits Rectangle {
         color: touch.pressed ? #fff : #eee;
         font-size: 20px;
     }
-
-    touch := TouchArea { }
+    touch := TouchArea {
+        clicked => {
+            CalcLogic.button-pressed(root.text, KeyType.Num);
+        }
+    }
 }
 
 component ButtonArth inherits Rectangle {
     in-out property text <=> txt.text;
-    callback clicked;
     property <bool> actived: false;
     border-radius: self.height * 0.2;
     border-width: 3px;
@@ -36,14 +95,13 @@ component ButtonArth inherits Rectangle {
     touch := TouchArea {
         clicked => {
             root.actived = !root.actived;
-            root.clicked();
+            CalcLogic.button-pressed(root.text, KeyType.Opt);
         }
     }
 }
 
 component ButtonMath inherits Rectangle {
     in-out property text <=> txt.text;
-    callback clicked <=> touch.clicked;
     border-radius: self.height * 0.2;
     border-width: 3px;
     border-color: black;
@@ -52,178 +110,75 @@ component ButtonMath inherits Rectangle {
         color: black;
         font-size: 20px;
     }
-
-    touch := TouchArea { }
+    touch := TouchArea {
+        clicked => {
+            CalcLogic.button-pressed(root.text, KeyType.Action);
+        }
+    }
 }
 
 export component Calculator inherits Rectangle {
     width: 240px;
     height: 280px;
     background: black;
-    in-out property <float> result: 0;
-    in-out property <length> font-size: 45px;
-    in-out property <string> clr: "AC";
     GoHome { }
 
     GridLayout {
         spacing: 0px;
         padding: 0px;
         Row {
-            result := Text {
+            Text {
                 horizontal-alignment: right;
                 vertical-alignment: bottom;
                 colspan: 4;
-                height: 80px;
+                height: 40px;
                 font-family: "SFUI Display";
-                font-size: root.font-size;
-                text: root.result;
+                font-size: 20px;
+                text: CalcLogic.result-display;
+                color: #aaa;
+            }
+        }
+        Row {
+            Text {
+                horizontal-alignment: right;
+                vertical-alignment: bottom;
+                colspan: 4;
+                height: 40px;
+                font-family: "SFUI Display";
+                font-size: 45px;
+                text: CalcLogic.result;
                 color: white;
             }
         }
 
         Row {
-            ButtonMath {
-                text: root.clr;
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonMath {
-                text: "+/-";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonMath {
-                text: "%";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonArth {
-                text: "÷";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
+            ButtonMath { text: "AC"; }
+            ButtonMath { text: "+/-"; }
+            ButtonMath { text: "%"; }
+            ButtonArth { text: "÷"; }
         }
-
         Row {
-            ButtonNum {
-                text: "7";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonNum {
-                text: "8";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonNum {
-                text: "9";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonArth {
-                text: "x";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
+            ButtonNum { text: "7"; }
+            ButtonNum { text: "8"; }
+            ButtonNum { text: "9"; }
+            ButtonArth { text: "x"; }
         }
-
         Row {
-            ButtonNum {
-                text: "4";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonNum {
-                text: "5";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonNum {
-                text: "6";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonArth {
-                text: "−";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
+            ButtonNum { text: "4"; }
+            ButtonNum { text: "5"; }
+            ButtonNum { text: "6"; }
+            ButtonArth { text: "−"; }
         }
-
         Row {
-            ButtonNum {
-                text: "1";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonNum {
-                text: "2";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonNum {
-                text: "3";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonArth {
-                text: "+";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
+            ButtonNum { text: "1"; }
+            ButtonNum { text: "2"; }
+            ButtonNum { text: "3"; }
+            ButtonArth { text: "+"; }
         }
-
         Row {
-            ButtonNum {
-                text: "0";
-                colspan: 2;
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonNum {
-                text: ".";
-                col: 2;
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
-
-            ButtonArth {
-                text: "=";
-                clicked => {
-                    CalcLogic.button-pressed(self.text);
-                }
-            }
+            ButtonNum { text: "0"; colspan: 2; }
+            ButtonNum { text: "."; col: 2; }
+            ButtonArth { text: "="; }
         }
     }
 }
