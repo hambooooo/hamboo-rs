@@ -10,7 +10,7 @@ enum  KeyType {
 export global CalcLogic {
     out property <bool> switched : false;
     out property <string> crt-item : "0";
-    out property <string> crt-opt : "+";
+    out property <string> crt-opt : "N";
     out property <string> result : "0";
     out property <string> result-display : "0";
     out property <string> temp-display;
@@ -40,7 +40,7 @@ export global CalcLogic {
             temp-display = "";
             last-keytype = KeyType.Num;
             crt-item = "0";
-            crt-opt = "+";
+            crt-opt = "N";
         }
         else if (type == KeyType.Opt) {
             if (last-keytype == type) {
