@@ -8,35 +8,22 @@ export component FacePointer inherits Rectangle {
     height: 280px;
     Image {
         z: 0;
-        source: @image-url("images/face-pointer-bg.jpg");
+        source: @image-url("images/face-pointer-bg.svg");
     }
     Image {
         z: 2;
         source: @image-url("images/face-pointer-hour.svg");
-        //rotation-angle: -60deg;
-
-//        animate rotation-angle {
-//            duration: 24 *  3600s;
-//        }
-//        init => {
-//            self.rotation-angle = 360deg;
-//        }
+//        rotation-angle: -60deg;
     }
     Image {
         z: 3;
         source: @image-url("images/face-pointer-minute.svg");
-        //rotation-angle: 40deg;
-//        animate rotation-angle {
-//            duration: 3600s;
-//        }
-//        init => {
-//            self.rotation-angle = 360deg;
-//        }
+//        rotation-angle: 40deg;
     }
     Image {
         z: 4;
         source: @image-url("images/face-pointer-second.svg");
-        //rotation-angle: 180deg;
+//        rotation-angle: 180deg;
 //        animate rotation-angle {
 //            duration: 60s;
 //            iteration-count:-1;
@@ -50,7 +37,7 @@ export component FacePointer inherits Rectangle {
         y: root.height * 0.15;
         text: "12";
         font-size: 30px;
-        color: #aaa;
+        color: white;
     }
     Text {
         z: 1;
@@ -58,14 +45,14 @@ export component FacePointer inherits Rectangle {
         x: root.width * 0.85 - self.width;
         text: "3";
         font-size: 30px;
-        color: #aaa;
+        color: white;
     }
     Text {
         z: 1;
         y: root.height * 0.85 - self.height;
         text: "6";
         font-size: 30px;
-        color: #aaa;
+        color: white;
     }
     Text {
         z: 1;
@@ -73,6 +60,6 @@ export component FacePointer inherits Rectangle {
         x: root.width * 0.15;
         text: "9";
         font-size: 30px;
-        color: #aaa;
+        color: white;
     }
 }
