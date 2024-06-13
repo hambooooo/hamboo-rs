@@ -10,24 +10,12 @@ export component StopWatch inherits Rectangle {
     property <int> start-time;
     property <int> minutes : (DateTime.seconds + DateTime.minutes * 60 - start-time) / 60;
     property <int> seconds : DateTime.seconds + DateTime.minutes * 60 - start-time - minutes * 60;
-    property <string> display : @tr("{}:{}.{}", minutes < 10 ? "0" + minutes : minutes, seconds < 10 ? "0" + seconds : seconds, ms.value < 10 ? "0" + ms.value : ms.value);
-    property <string> result : "00:00.00";
+    property <string> display : @tr("{}:{}", minutes < 10 ? "0" + minutes : minutes, seconds < 10 ? "0" + seconds : seconds);
+    property <string> result : "00:00";
     GoHome {}
     VerticalBox {
         padding-top: 40px;
         alignment: center;
-        ms := Rectangle {
-            width: 0;
-            height: 0;
-            property <int> value : 0;
-            animate value {
-                 duration: 1s;
-                 iteration-count:-1;
-            }
-            init => {
-                value = 99;
-            }
-        }
         if running : Text {
             horizontal-alignment: center;
             text: display;
@@ -44,7 +32,7 @@ export component StopWatch inherits Rectangle {
             Button {
                 text:  "复位";
                 clicked => {
-                    result = "00:00.00";
+                    result = "00:00";
                 }
             }
 

@@ -6,6 +6,7 @@ import { DateTime } from "./global.slint";
 export component FacePointer inherits Rectangle {
     width: 240px;
     height: 280px;
+    property <float> zoom : root.height / 240px;
     Image {
         z: 0;
         width: root.width;
@@ -14,16 +15,22 @@ export component FacePointer inherits Rectangle {
     }
     Image {
         z: 2;
+        height: 202px * zoom;
+        width: 12px * zoom;
         source: @image-url("images/face-pointer-hour.svg");
 //        rotation-angle: -60deg;
     }
     Image {
         z: 3;
+        height: 202px * zoom;
+        width: 12px * zoom;
         source: @image-url("images/face-pointer-minute.svg");
 //        rotation-angle: 40deg;
     }
     Image {
         z: 4;
+        height: 202px * zoom;
+        width: 12px * zoom;
         source: @image-url("images/face-pointer-second.svg");
 //        rotation-angle: 180deg;
 //        animate rotation-angle {
@@ -37,17 +44,17 @@ export component FacePointer inherits Rectangle {
     Rectangle {
         z: 1;
         y: root.height * 0.6;
-        width: 30px;
-        height: 20px;
+        width: 30px * zoom;
+        height: 20px * zoom;
         border-width: 2px;
-        border-radius: 5px;
+        border-radius: 5px * zoom;
         border-color: #555;
         background: #222;
         Text {
             horizontal-alignment: center;
             vertical-alignment: center;
             text: DateTime.day < 10 ? "0" + DateTime.day : DateTime.day;
-            font-size: 14px;
+            font-size: 14px * zoom;
             font-weight: 600;
             color: #bbb;
         }
@@ -56,22 +63,22 @@ export component FacePointer inherits Rectangle {
         z: 1;
         y: root.height * 0.15;
         text: "12";
-        font-size: 30px;
+        font-size: 30px * zoom;
         color: white;
     }
     Text {
         z: 1;
         y: (root.height - self.height) / 2;
-        x: root.width * 0.85 - self.width;
+        x: (root.width - self.width) * 0.85;
         text: "3";
-        font-size: 30px;
+        font-size: 30px * zoom;
         color: white;
     }
     Text {
         z: 1;
-        y: root.height * 0.85 - self.height;
+        y: (root.height - self.height) * 0.85;
         text: "6";
-        font-size: 30px;
+        font-size: 30px * zoom;
         color: white;
     }
     Text {
@@ -79,7 +86,7 @@ export component FacePointer inherits Rectangle {
         y: (root.height - self.height) / 2;
         x: root.width * 0.15;
         text: "9";
-        font-size: 30px;
+        font-size: 30px * zoom;
         color: white;
     }
 }

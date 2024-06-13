@@ -13,39 +13,40 @@ export component FaceManager inherits Rectangle {
 
     property <int> max-index: 3;
     property <int> crt-index: 0;
-    property <physical-length> fa-x: -160px;
-    property <physical-length> fb-x: 30px;
-    property <physical-length> fc-x: 220px;
+    property <physical-length> fa-x: -130px;
+    property <physical-length> fb-x: 40px;
+    property <physical-length> fc-x: 210px;
 
-    GoHome {}
+    GoHome {
+        z : 999;
+    }
     // index = 0
     if crt-index == max-index || crt-index <= 1 : FaceHamboo {
         x: crt-index == max-index ? fa-x : crt-index == 0 ? fb-x : fc-x;
-        y: 30px;
-        height: 200px;
-        width: 180px;
+        y: 40px;
+        height: 187px;
+        width: 160px;
     }
     // index = 1
     if crt-index >= 0 && crt-index <= 2 : FacePointer {
         x: crt-index == 0 ? fa-x : crt-index == 1 ? fb-x : fc-x;
-        y: 30px;
-        height: 200px;
-        width: 180px;
+        y: 40px;
+        height: 187px;
+        width: 160px;
     }
     // index = 2
     if crt-index >= 1 && crt-index <= 3 : FaceDigital {
         x: crt-index == 1 ? fa-x : crt-index == 2 ? fb-x : fc-x;
-        y: 30px;
-        height: 200px;
-        width: 180px;
-        font-size: 90px;
+        y: 40px;
+        height: 187px;
+        width: 160px;
     }
     // index = 3
     if crt-index >= 2 || crt-index == 0 : FacePicture {
         x: crt-index == 2 ? fa-x : crt-index == 3 ? fb-x : fc-x;
-        y: 30px;
-        height: 200px;
-        width: 180px;
+        y: 40px;
+        height: 187px;
+        width: 160px;
     }
     Button {
         y: 240px;

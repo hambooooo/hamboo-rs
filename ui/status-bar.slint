@@ -86,6 +86,7 @@ export component StatusBar inherits Rectangle {
             }
         }
         music := Rectangle {
+            visible: false;
             background: root.back-color;
             border-color: gray;
             border-width: 1px;
@@ -98,7 +99,7 @@ export component StatusBar inherits Rectangle {
                     Image {
                         width: 50px;
                         height: 60px;
-                        source: @image-url("./images/music.jpg");
+                        //source: @image-url("./images/music.jpg");
                     }
                     GridBox {
                         padding-left: 0px;

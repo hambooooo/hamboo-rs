@@ -1,41 +1,44 @@
 import { DateTime } from "./global.slint";
 
 export component FacePicture inherits Rectangle {
+    width: 240px;
+    height: 280px;
+    property <float> zoom : self.height / 280px;
     Image {
         height: root.height;
         width: root.width;
-        source: @image-url("./images/hamboo.jpg");
+        source: @image-url("./images/face-picture-luck.jpg");
         date := Text {
             x: root.width - self.width - 5px;
-            y: (root.height - self.height) / 9;
+            y: (root.height - self.height) / 9 * zoom;
             // DateTime.weekday_cn not work ???
             property <[string]> WEEKDAYS_CN: ["一", "二", "三", "四", "五", "六", "日"];
             text: @tr("{} 星期{}", DateTime.day, WEEKDAYS_CN[DateTime.weekday]);
-            font-size: 11px;
+            font-size: 11px * zoom;
             color: white;
         }
         Rectangle{
-            x: 150px;
-            y: 35px;
-            width: 140px;
-            height: 60px;
+            x: root.width - self.width;
+            y: 35px * zoom;
+            width: 90px * zoom;
+            height: 60px * zoom;
             hours := Text {
                 x: 0px;
                 text: DateTime.hours< 10 ? "0" + DateTime.hours : DateTime.hours;
-                font-size: 35px;
+                font-size: 35px * zoom;
                 color: #fff;
             }
             seconds := Text {
                 x: hours.width + 2px;
                 y: (parent.height - self.height) / 2  - 2px;
                 text: ":";
-                font-size: 30px;
+                font-size: 30px * zoom;
                 color: #fff;
             }
             minutes := Text {
                 x: seconds.x + seconds.width + 2px;
                 text: DateTime.minutes< 10 ? "0" + DateTime.minutes : DateTime.minutes;
-                font-size: 35px;
+                font-size: 35px * zoom;
                 color: #fff;
             }
         }
