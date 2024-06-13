@@ -7,7 +7,7 @@ import { Router, Battery, DateTime, System } from "./global.slint";
 export component StatusBar inherits Rectangle {
     width: 240px;
     height: 280px;
-    background: lightgrey;
+    background: #666;
     property <color> fond-color: white;
     property <color> back-color: #999;
     property <bool> moved: false;
@@ -21,7 +21,7 @@ export component StatusBar inherits Rectangle {
             padding-left: 10px;
             padding-right: 10px;
             Text {
-                color: black;
+                color: white;
                 font-weight: 500;
                 // DateTime.weekday_cn not work ???
                 property <[string]> WEEKDAYS_CN: ["一", "二", "三", "四", "五", "六", "日"];
@@ -174,6 +174,13 @@ export component StatusBar inherits Rectangle {
                 }
             }
         }
+    }
+    Rectangle {
+        y: root.height - self.height - 3px;
+        height: 5px;
+        width: 50px;
+        background: gray;
+        border-radius: 2px;
     }
     TouchArea {
         z: -1;
