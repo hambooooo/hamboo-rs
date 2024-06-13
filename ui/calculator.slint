@@ -82,7 +82,7 @@ component ButtonNum inherits Rectangle {
 
 component ButtonArth inherits Rectangle {
     in-out property text <=> txt.text;
-    property <bool> actived: false;
+    property <bool> actived : CalcLogic.crt-opt == text;
     border-radius: self.height * 0.2;
     border-width: 3px;
     border-color: black;
@@ -94,7 +94,6 @@ component ButtonArth inherits Rectangle {
 
     touch := TouchArea {
         clicked => {
-            root.actived = !root.actived;
             CalcLogic.button-pressed(root.text, KeyType.Opt);
         }
     }
