@@ -8,6 +8,8 @@ export component FacePointer inherits Rectangle {
     height: 280px;
     Image {
         z: 0;
+        width: root.width;
+        height: root.height;
         source: @image-url("images/face-pointer-bg.svg");
     }
     Image {
@@ -31,14 +33,6 @@ export component FacePointer inherits Rectangle {
 //        init => {
 //            self.rotation-angle = 360deg;
 //        }
-    }
-    Text {
-        z: 1;
-        y: root.height * 0.27;
-        text: "HAMBOO";
-        font-size: 15px;
-        font-weight: 700;
-        color: #311;
     }
     Rectangle {
         z: 1;

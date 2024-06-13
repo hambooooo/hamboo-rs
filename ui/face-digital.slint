@@ -4,7 +4,7 @@ export component FaceDigital inherits Rectangle {
     width: 240px;
     height: 280px;
     background: black;
-    property <physical-length> font-size : 120px;
+    in property <physical-length> font-size : 120px;
     Text {
         y: root.height / 2 - self.height / 10 * 9;
         text: DateTime.hours< 10 ? "0" + DateTime.hours : DateTime.hours;

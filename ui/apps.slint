@@ -36,7 +36,7 @@ export component Apps inherits Rectangle {
         duration: self.animate_time;
     }
     in property <[{name: string, app: Router, icon: image}]> model: [
-        { name: "表盘管理", app: Router.Todo, icon: @image-url("images/app-watch.svg") },
+        { name: "表盘管理", app: Router.FaceManager, icon: @image-url("images/app-watch.svg") },
 //        { name: "天气", app: Router.Todo, icon: @image-url("images/app-weater.svg") },
 //        { name: "闹钟", app: Router.Todo, icon: @image-url("images/app-clock.svg") },
         { name: "秒表", app: Router.StopWatch, icon: @image-url("images/app-timer.svg") },

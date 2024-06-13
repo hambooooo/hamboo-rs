@@ -3,7 +3,7 @@ import { StatusBar } from "./status-bar.slint";
 import { Apps } from "./apps.slint";
 import { Settings } from "./settings.slint";
 import { Router, Battery, DateTime, System } from "./global.slint";
-import { FaceHamboo } from "./face-hamboo.slint";
+import { FaceManager } from "./face-manager.slint";
 import { Calculator } from "./calculator.slint";
 import { StopWatch } from "./stopwatch.slint";
 import { Home } from "./home.slint";
@@ -22,5 +22,6 @@ export component UI inherits Window {
     if System.current-page == Router.Settings : Settings { }
     if System.current-page == Router.Calculator : Calculator { }
     if System.current-page == Router.StopWatch : StopWatch { }
+    if System.current-page == Router.FaceManager : FaceManager { }
     if System.current-page == Router.Todo : Todo { }
 }
