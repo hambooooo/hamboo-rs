@@ -152,15 +152,18 @@ pub async fn run(
         rtc_cloned.lock().deref_mut().set_datetime(&new_datetime).expect("Set datetime error");
     });
 
-    // // 延迟亮屏过滤花屏
-    // let bl_timer = slint::Timer::default();
-    // bl_timer.start(slint::TimerMode::SingleShot, core::time::Duration::from_secs(1), move || {
-    //     bl_pwm_pin.set_timestamp(50);
-    // });
+    // 延迟亮屏过滤花屏
+    let bl = Arc::new(Mutex::new(bl_pwm_pin));
+    let bl_timer = slint::Timer::default();
+    let bl_cloned = bl.clone();
+    bl_timer.start(slint::TimerMode::SingleShot, core::time::Duration::from_secs(1), move || {
+        bl_cloned.lock().deref_mut().set_timestamp(50);
+    });
 
     // 控制屏幕亮度
+    let bl_cloned = bl.clone();
     ui.global::<System>().on_brightness_change(move |value| {
-        bl_pwm_pin.set_timestamp((value as f32 * 0.9 + 10.0) as u16);
+        bl_cloned.lock().deref_mut().set_timestamp((value as f32 * 0.9 + 10.0) as u16);
     });
 
     // 处理触摸屏问题

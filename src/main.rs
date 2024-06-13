@@ -78,7 +78,7 @@ async fn main(spawner: Spawner) {
         .unwrap();
     mcpwm.timer0.start(timer_clock_cfg);
     // pin will be high 50% of the time
-    bl_pwm_pin.set_timestamp(50);
+    // bl_pwm_pin.set_timestamp(50);
 
     let spi = Spi::new(
         peripherals.SPI3,
