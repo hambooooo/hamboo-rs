@@ -4,6 +4,7 @@ import { Apps } from "./apps.slint";
 import { Settings } from "./settings.slint";
 import { Router, System } from "./global.slint";
 import { FaceHamboo } from "./face-hamboo.slint";
+import { FacePicture } from "./face-picture.slint";
 import { FaceDigital } from "./face-digital.slint";
 import { FacePointer } from "./face-pointer.slint";
 import { Calculator } from "./calculator.slint";
@@ -24,8 +25,9 @@ export component Home inherits Rectangle {
     }
     home := Rectangle {
         if System.current-face-id == 0: FaceHamboo {}
-        if System.current-face-id == 1: FaceDigital {}
-        if System.current-face-id == 2: FacePointer {}
+        if System.current-face-id == 1: FacePicture {}
+        if System.current-face-id == 2: FaceDigital {}
+        if System.current-face-id == 3: FacePointer {}
 
         TouchArea {
             x: 0;
@@ -84,11 +86,11 @@ export component Home inherits Rectangle {
                 }
                 if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 3) {
                     System.current-face-id += 1;
-                    System.current-face-id = System.current-face-id > 2 ? 0 : System.current-face-id;
+                    System.current-face-id = System.current-face-id > 3 ? 0 : System.current-face-id;
                 }
                 if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 4) {
                     System.current-face-id -= 1;
-                    System.current-face-id = System.current-face-id < 0 ? 2 : System.current-face-id;
+                    System.current-face-id = System.current-face-id < 0 ? 3 : System.current-face-id;
                 }
             }
         }

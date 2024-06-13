@@ -1,0 +1,44 @@
+import { DateTime } from "./global.slint";
+
+export component FacePicture inherits Rectangle {
+    Image {
+        height: root.height;
+        width: root.width;
+        source: @image-url("./images/face-picture-luck.jpg");
+        date := Text {
+            x: root.width - self.width;
+            y: (root.height - self.height) / 9;
+            // DateTime.weekday_cn not work ???
+            property <[string]> WEEKDAYS_CN: ["一", "二", "三", "四", "五", "六", "日"];
+            text: @tr("{} 星期{}", DateTime.day, WEEKDAYS_CN[DateTime.weekday]);
+            font-size: 11px;
+            color: white;
+        }
+        Rectangle{
+            x: 150px;
+            y: 35px;
+            width: 140px;
+            height: 60px;
+            hours := Text {
+                x: 0px;
+                text: DateTime.hours< 10 ? "0" + DateTime.hours : DateTime.hours;
+                font-size: 35px;
+                color: #fff;
+            }
+            seconds := Text {
+                x: hours.width + 2px;
+                y: (parent.height - self.height) / 2  - 2px;
+                text: ":";
+                font-size: 30px;
+                color: #fff;
+            }
+            minutes := Text {
+                x: seconds.x + seconds.width + 2px;
+                text: DateTime.minutes< 10 ? "0" + DateTime.minutes : DateTime.minutes;
+                font-size: 35px;
+                color: #fff;
+            }
+        }
+    }
+    @children
+}
