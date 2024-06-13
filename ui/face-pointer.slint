@@ -32,6 +32,22 @@ export component FacePointer inherits Rectangle {
 //            self.rotation-angle = 360deg;
 //        }
     }
+    Rectangle {
+        z: 1;
+        y: root.height * 0.6;
+        width: 30px;
+        height: 20px;
+        border-color: #888;
+        border-radius: 5px;
+        border-width: 1px;
+        Text {
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            text: DateTime.day < 10 ? "0" + DateTime.day : DateTime.day;
+            font-size: 14px;
+            color: #888;
+        }
+    }
     Text {
         z: 1;
         y: root.height * 0.15;
