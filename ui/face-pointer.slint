@@ -13,24 +13,24 @@ export component FacePointer inherits Rectangle {
     Image {
         z: 2;
         source: @image-url("images/face-pointer-hour.svg");
-        rotation-angle: -60deg;
+//        rotation-angle: -60deg;
     }
     Image {
         z: 3;
         source: @image-url("images/face-pointer-minute.svg");
-        rotation-angle: 40deg;
+//        rotation-angle: 40deg;
     }
     Image {
         z: 4;
         source: @image-url("images/face-pointer-second.svg");
-        rotation-angle: 180deg;
-        animate rotation-angle {
-            duration: 60s;
-            iteration-count:-1;
-        }
-        init => {
-            self.rotation-angle = 360deg;
-        }
+//        rotation-angle: 180deg;
+//        animate rotation-angle {
+//            duration: 60s;
+//            iteration-count:-1;
+//        }
+//        init => {
+//            self.rotation-angle = 360deg;
+//        }
     }
     Text {
         z: 1;
@@ -45,9 +45,9 @@ export component FacePointer inherits Rectangle {
         y: root.height * 0.6;
         width: 30px;
         height: 20px;
-        border-width: 1px;
+        border-width: 2px;
         border-radius: 5px;
-        border-color: #888;
+        border-color: #555;
         background: #222;
         Text {
             horizontal-alignment: center;
