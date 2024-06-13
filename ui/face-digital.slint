@@ -7,17 +7,34 @@ export component FaceDigital inherits Rectangle {
     property <float> zoom : self.height / 280px;
     in property <physical-length> font-size : 120px * zoom;
     Text {
+        x: 240px;
         y: root.height / 2 - self.height / 10 * 9;
         text: DateTime.hours< 10 ? "0" + DateTime.hours : DateTime.hours;
         font-size: font-size;
         font-weight: 800 * zoom;
         color: #8fbc8f;
+        property <duration> duration : 0;
+        animate x {
+             easing: ease-out-back;
+             duration: 500ms;
+        }
+        init => {
+            self.x = (root.width - self.width) / 2;
+        }
     }
     Text {
+        x: -160px;
         y: root.height / 2 - self.height / 10;
         text: DateTime.minutes< 10 ? "0" + DateTime.minutes : DateTime.minutes;
         font-size: font-size;
         font-weight: 800 * zoom;
         color: #9370b9;
+        animate x {
+             easing: ease-out-back;
+             duration: 500ms;
+        }
+        init => {
+            self.x = (root.width - self.width) / 2;
+        }
     }
 }

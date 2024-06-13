@@ -18,14 +18,28 @@ export component FacePointer inherits Rectangle {
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-hour.svg");
-//        rotation-angle: -60deg;
+//        rotation-angle: 0;
+//        animate rotation-angle {
+//             easing: ease-in;
+//             duration: 500ms;
+//        }
+//        init => {
+//            self.rotation-angle = 300deg;
+//        }
     }
     Image {
         z: 3;
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-minute.svg");
-//        rotation-angle: 40deg;
+//        rotation-angle: 0;
+//        animate rotation-angle {
+//             easing: ease-in;
+//             duration: 500ms;
+//        }
+//        init => {
+//            self.rotation-angle = 40deg;
+//        }
     }
     Image {
         z: 4;
@@ -51,12 +65,20 @@ export component FacePointer inherits Rectangle {
         border-color: #555;
         background: #222;
         Text {
+            property <int> day : 1;
             horizontal-alignment: center;
             vertical-alignment: center;
-            text: DateTime.day < 10 ? "0" + DateTime.day : DateTime.day;
+            text: day;
             font-size: 14px * zoom;
             font-weight: 600;
             color: #bbb;
+            animate day {
+                easing: ease-in;
+                duration: 1s;
+            }
+            init => {
+                self.day = DateTime.day;
+            }
         }
     }
     Text {
