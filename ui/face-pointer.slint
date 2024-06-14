@@ -6,54 +6,57 @@ import { DateTime } from "./global.slint";
 export component FacePointer inherits Rectangle {
     width: 240px;
     height: 280px;
-    property <float> zoom : root.height / 240px;
+    property <float> zoom : root.height / 280px;
+    property <angle> seconds_angle : DateTime.seconds * 6deg;
+    property <angle> minutes_angle : DateTime.minutes * 6deg + seconds_angle / 60;
+    property <angle> hours_angle : (DateTime.hours >= 12 ? DateTime.hours - 12 : DateTime.hours) * 30deg + minutes_angle /  12;
     Image {
         z: 0;
         width: root.width;
         height: root.height;
         source: @image-url("images/face-pointer-bg.svg");
     }
-    Image {
+    hour := Image {
         z: 2;
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-hour.svg");
-//        rotation-angle: 0;
-//        animate rotation-angle {
-//             easing: ease-in;
-//             duration: 500ms;
-//        }
-//        init => {
-//            self.rotation-angle = 300deg;
-//        }
+        rotation-angle: 0;
+        animate rotation-angle {
+             easing: ease-in;
+             duration: 500ms;
+        }
+        init => {
+            self.rotation-angle = hours_angle;
+        }
     }
     Image {
         z: 3;
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-minute.svg");
-//        rotation-angle: 0;
-//        animate rotation-angle {
-//             easing: ease-in;
-//             duration: 500ms;
-//        }
-//        init => {
-//            self.rotation-angle = 40deg;
-//        }
+        rotation-angle: 0;
+        animate rotation-angle {
+             easing: ease-in;
+             duration: 500ms;
+        }
+        init => {
+            self.rotation-angle = minutes_angle;
+        }
     }
     Image {
         z: 4;
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-second.svg");
-//        rotation-angle: 180deg;
-//        animate rotation-angle {
-//            duration: 60s;
+        rotation-angle: 0;
+        animate rotation-angle {
+            duration: 500ms;
 //            iteration-count:-1;
-//        }
-//        init => {
-//            self.rotation-angle = 360deg;
-//        }
+        }
+        init => {
+            self.rotation-angle = seconds_angle;
+        }
     }
     Rectangle {
         z: 1;
