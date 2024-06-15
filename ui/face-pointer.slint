@@ -21,42 +21,42 @@ export component FacePointer inherits Rectangle {
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-hour.svg");
-        rotation-angle: 0;
-        animate rotation-angle {
-             easing: ease-in;
-             duration: 500ms;
-        }
-        init => {
-            self.rotation-angle = hours_angle;
-        }
+//        rotation-angle: 0;
+//        animate rotation-angle {
+//             easing: ease-in;
+//             duration: 500ms;
+//        }
+//        init => {
+//            self.rotation-angle = hours_angle;
+//        }
     }
     Image {
         z: 3;
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-minute.svg");
-        rotation-angle: 0;
-        animate rotation-angle {
-             easing: ease-in;
-             duration: 500ms;
-        }
-        init => {
-            self.rotation-angle = minutes_angle;
-        }
+//        rotation-angle: 0;
+//        animate rotation-angle {
+//             easing: ease-in;
+//             duration: 500ms;
+//        }
+//        init => {
+//            self.rotation-angle = minutes_angle;
+//        }
     }
     Image {
         z: 4;
         height: 202px * zoom;
         width: 12px * zoom;
         source: @image-url("images/face-pointer-second.svg");
-        rotation-angle: 0;
-        animate rotation-angle {
-            duration: 500ms;
-//            iteration-count:-1;
-        }
-        init => {
-            self.rotation-angle = seconds_angle;
-        }
+//        rotation-angle: 0;
+//        animate rotation-angle {
+//            duration: 500ms;
+////            iteration-count:-1;
+//        }
+//        init => {
+//            self.rotation-angle = seconds_angle;
+//        }
     }
     Rectangle {
         z: 1;

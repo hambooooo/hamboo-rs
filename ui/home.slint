@@ -61,7 +61,6 @@ export component Home inherits Rectangle {
             }
             pointer-event(event) => {
                 if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 1) {
-                    self.is_moved = false;
                     status-bar.animate_time = 200ms;
                     if (self.mouse_y < root.height / 2) {
                         status-bar.y = root.height * -1;
@@ -73,7 +72,6 @@ export component Home inherits Rectangle {
                     }
                 }
                 if (event.kind == PointerEventKind.up && self.is_moved && self.moved_direction == 2) {
-                    self.is_moved = false;
                     apps.animate_time = 200ms;
                     if (self.mouse_y > root.height / 2) {
                         apps.y = root.height;
@@ -92,6 +90,7 @@ export component Home inherits Rectangle {
                     System.current-face-id -= 1;
                     System.current-face-id = System.current-face-id < 0 ? 3 : System.current-face-id;
                 }
+                self.is_moved = false;
             }
         }
     }
