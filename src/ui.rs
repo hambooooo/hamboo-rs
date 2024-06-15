@@ -102,7 +102,7 @@ pub async fn run(
     mut touch: CST816S<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>, GpioPin<Input<PullUp>, 9>, GpioPin<Output<PushPull>, 10>>,
     mut axp2101: Axp2101<I2CInterface<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>>>,
     rtc: PCF8563<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>>,
-    mut bl_pwm_pin: PwmPin<'static, GpioPin<Output<PushPull>, 18>, MCPWM0, 0, true>,
+    bl_pwm_pin: PwmPin<'static, GpioPin<Output<PushPull>, 18>, MCPWM0, 0, true>,
 ) {
     let mut buffer_provider = DrawBuffer {
         display,

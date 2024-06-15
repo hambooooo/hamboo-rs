@@ -69,7 +69,7 @@ async fn main(spawner: Spawner) {
     let clock_cfg = PeripheralClockConfig::with_frequency(&clocks, 40u32.MHz()).unwrap();
     let mut mcpwm = MCPWM::new(peripherals.MCPWM0, clock_cfg);
     mcpwm.operator0.set_timer(&mcpwm.timer0);
-    let mut bl_pwm_pin = mcpwm
+    let bl_pwm_pin = mcpwm
         .operator0
         .with_pin_a(bl, PwmPinConfig::UP_ACTIVE_HIGH);
     // start timer with timestamp values in the range of 0..=99 and a frequency of 100 kHz
