@@ -39,29 +39,32 @@ export component StatusBar inherits Rectangle {
                 Button {
                     height: button-size;
                     width: button-size;
+                    icon: @image-url("images/icon-wifi.svg");
+                }
+                Button {
+                    icon-rate: 0.5;
+                    height: button-size;
+                    width: button-size;
+                    icon: @image-url("images/icon-bluetools.svg");
+                }
+                Button {
+                    height: button-size;
+                    width: button-size;
                     icon: @image-url("images/icon-disable-alarm.svg");
                 }
                 Button {
-                     height: button-size;
-                     width: button-size;
-                     icon: @image-url("images/icon-wifi.svg");
-                 }
-                 Button {
-                     height: button-size;
-                     width: button-size;
-                     icon: @image-url("images/icon-bluetools.svg");
-                 }
-                 Button {
-                     height: button-size;
-                     width: button-size;
-                     icon: @image-url("images/icon-settings.svg");
-                     clicked => {
+                    icon-rate: 0.75;
+                    height: button-size;
+                    width: button-size;
+                    icon: @image-url("images/icon-settings.svg");
+                    clicked => {
                         System.current-page = Router.Settings;
-                     }
-                 }
+                    }
+                }
             }
         }
         Slider {
+            height: 40px;
             width: 220px;
             value: 50;
             background: root.back-color;
@@ -72,6 +75,7 @@ export component StatusBar inherits Rectangle {
             }
         }
         Slider {
+            height: 40px;
             width: 220px;
             value: 20;
             background: root.back-color;

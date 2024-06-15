@@ -8,18 +8,25 @@ component App inherits Rectangle {
     background: touch.pressed ? white : rgba(34,43,67, 0.9);
     border-radius: self.height / 2 * 0.5;
     border-color: self.background;
-    icon := Image {
-        x: 50px;
-        width: root.height * 0.8;
-        height: self.width;
-        source: root.icon;
+    HorizontalBox {
+        width: icon.width + name.width;
+        icon := Image {
+            width: root.height * 0.7;
+            height: self.width;
+            source: root.icon;
+        }
+        name := HorizontalBox {
+            width: 80px;
+            Text {
+                horizontal-alignment: left;
+                vertical-alignment: center;
+                text: root.name;
+                font-size: 13px;
+                color: touch.pressed ? black : white;
+            }
+        }
     }
-    Text {
-        x: (root.width - icon.width - icon.x);
-        text: root.name;
-        font-size: 13px;
-        color: touch.pressed ? black : white;
-    }
+
     touch := TouchArea {}
 }
 
@@ -46,17 +53,17 @@ export component Apps inherits Rectangle {
     }
     in property <[{name: string, app: Router, icon: image}]> model: [
         { name: "表盘管理", app: Router.FaceManager, icon: @image-url("images/app-watch.svg") },
-        { name: "天气", app: Router.Todo, icon: @image-url("images/app-weater.svg") },
-        { name: "闹钟", app: Router.Todo, icon: @image-url("images/app-clock.svg") },
         { name: "秒表", app: Router.StopWatch, icon: @image-url("images/app-timer.svg") },
+        { name: "计算器", app: Router.Calculator, icon: @image-url("images/app-calculate.svg") },
+//        { name: "天气", app: Router.Todo, icon: @image-url("images/app-weater.svg") },
+//        { name: "闹钟", app: Router.Todo, icon: @image-url("images/app-clock.svg") },
 //        { name: "NFC", app: Router.Todo, icon: @image-url("images/app-nfc.svg") },
 //        { name: "运动健康", app: Router.Todo, icon: @image-url("images/app-sports.svg") },
 //        { name: "指南针", app: Router.Todo, icon: @image-url("images/app-compass.svg") },
 //        { name: "音乐", app: Router.Todo, icon: @image-url("images/app-music.svg") },
 //        { name: "智能家居", app: Router.Todo, icon: @image-url("images/app-house.svg") },
-        { name: "计算器", app: Router.Calculator, icon: @image-url("images/app-calculate.svg") },
 //        { name: "哔哩哔哩", app: Router.Todo, icon: @image-url("images/app-bilibili.svg") },
-//        { name: "游戏中心", app: Router.Todo, icon: @image-url("images/app-game.svg") },
+        { name: "游戏中心", app: Router.Todo, icon: @image-url("images/app-game.svg") },
         { name: "系统设置", app: Router.Settings, icon: @image-url("images/app-settings.svg") },
     ];
     flick-area := Flickable {
