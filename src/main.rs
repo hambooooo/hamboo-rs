@@ -15,6 +15,7 @@ use embedded_hal_bus::i2c::RefCellDevice;
 use embedded_hal_bus::spi::ExclusiveDevice;
 use esp_backtrace as _;
 use esp_hal as hal;
+use hal::gpio::NO_PIN;
 use hal::clock::ClockControl;
 use hal::embassy;
 use hal::gpio::IO;
@@ -90,6 +91,7 @@ async fn main(spawner: Spawner) {
     log::info!("spi init.");
 
     let spi_device = ExclusiveDevice::new(spi, cs, delay);
+
     let di = SPIInterface::new(spi_device, dc);
     let display = Builder::new(ST7789, di)
         .reset_pin(rst)
@@ -100,6 +102,30 @@ async fn main(spawner: Spawner) {
         .init(&mut delay)
         .unwrap();
     log::info!("display init.");
+
+    // SD_CLK
+    let sd_spi_sck = io.pins.gpio36;
+    // SD_CMD
+    let sd_spi_mosi = io.pins.gpio37;
+    // SD_DAT0
+    let sd_spi_miso = io.pins.gpio39;
+    // SD_DAT1
+    let _sd_spi_sio2 = io.pins.gpio38;
+    // SD_DAT2
+    let _sd_spi_sio3 = io.pins.gpio34;
+    // SD_DAT3
+    let sd_spi_cs = io.pins.gpio35.into_push_pull_output();
+
+    let sd_spi = Spi::new(
+        peripherals.SPI2,
+        24u32.MHz(),
+        SpiMode::Mode0,
+        &clocks,
+    ).with_pins(Some(sd_spi_sck), Some(sd_spi_mosi), Some(sd_spi_miso), NO_PIN);
+
+    // About spi device but not spi bus @see https://github.com/rust-embedded-community/embedded-sdmmc-rs/issues/126
+    let sd_spi_device = ExclusiveDevice::new_no_delay(sd_spi, embedded_sdmmc::sdcard::DummyCsPin);
+    hamboo::storage::sdmmc(sd_spi_device, sd_spi_cs, delay, hamboo::storage::SdMmcClock).unwrap();
 
     let touch_int = io.pins.gpio9.into_pull_up_input();
     let touch_rst = io.pins.gpio10.into_push_pull_output();
