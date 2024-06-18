@@ -103,17 +103,9 @@ async fn main(spawner: Spawner) {
         .unwrap();
     log::info!("display init.");
 
-    // SD_CLK
     let sd_spi_sck = io.pins.gpio36;
-    // SD_CMD
     let sd_spi_mosi = io.pins.gpio37;
-    // SD_DAT0
     let sd_spi_miso = io.pins.gpio39;
-    // SD_DAT1
-    let _sd_spi_sio2 = io.pins.gpio38;
-    // SD_DAT2
-    let _sd_spi_sio3 = io.pins.gpio34;
-    // SD_DAT3
     let sd_spi_cs = io.pins.gpio35.into_push_pull_output();
 
     let sd_spi = Spi::new(

@@ -1,4 +1,5 @@
 import { DateTime } from "./global.slint";
+import "./fonts/num-playball.ttf";
 
 
 // Missing implementation for rotating Image using software renderer
@@ -89,6 +90,7 @@ export component FacePointer inherits Rectangle {
         y: root.height * 0.15;
         text: "12";
         font-size: 30px * zoom;
+        font-family: "Playball";
         color: white;
     }
     Text {
@@ -97,6 +99,7 @@ export component FacePointer inherits Rectangle {
         x: (root.width - self.width) * 0.85;
         text: "3";
         font-size: 30px * zoom;
+        font-family: "Playball";
         color: white;
     }
     Text {
@@ -104,6 +107,7 @@ export component FacePointer inherits Rectangle {
         y: (root.height - self.height) * 0.85;
         text: "6";
         font-size: 30px * zoom;
+        font-family: "Playball";
         color: white;
     }
     Text {
@@ -111,6 +115,7 @@ export component FacePointer inherits Rectangle {
         y: (root.height - self.height) / 2;
         x: root.width * 0.15;
         text: "9";
+        font-family: "Playball";
         font-size: 30px * zoom;
         color: white;
     }

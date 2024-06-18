@@ -1,4 +1,5 @@
 import { DateTime } from "./global.slint";
+import "./fonts/num-goldman.ttf";
 
 export component FaceDigital inherits Rectangle {
     width: 240px;
@@ -12,6 +13,7 @@ export component FaceDigital inherits Rectangle {
         text: DateTime.hours< 10 ? "0" + DateTime.hours : DateTime.hours;
         font-size: font-size;
         font-weight: 800 * zoom;
+        font-family: "Goldman";
         color: #8fbc8f;
         property <duration> duration : 0;
         animate x {
@@ -28,6 +30,7 @@ export component FaceDigital inherits Rectangle {
         text: DateTime.minutes< 10 ? "0" + DateTime.minutes : DateTime.minutes;
         font-size: font-size;
         font-weight: 800 * zoom;
+        font-family: "Goldman";
         color: #9370b9;
         animate x {
              easing: ease-out-back;

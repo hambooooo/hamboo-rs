@@ -18,15 +18,15 @@ export component Slider inherits Rectangle {
 
     handle := Rectangle {
         x: 0;
-        height: parent.height;
+        height: self.width * 3.14 < root.height ? self.width * 3.14 : root.height;
         border-width: 1px;
-        border-top-left-radius: self.height / 2;
-        border-bottom-left-radius: self.height / 2;
-        border-top-right-radius: (self.height / 2) - (root.width - self.width);
-        border-bottom-right-radius: (self.height / 2) - (root.width - self.width);
+        border-top-left-radius: root.height / 2;
+        border-bottom-left-radius: root.height / 2;
+        border-top-right-radius: (root.height / 2) - (root.width - self.width);
+        border-bottom-right-radius: (root.height / 2) - (root.width - self.width);
         background: #fff;
         border-color: #fff;
-        width: root.width * (root.value - root.minimum)/(root.maximum - root.minimum);
+        width: root.width * (root.value - root.minimum) / (root.maximum - root.minimum);
     }
     @children
     touch := TouchArea {
