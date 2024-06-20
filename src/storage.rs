@@ -1,28 +1,47 @@
-use embedded_sdmmc::{Error, Mode, SdCard, SdCardError, TimeSource, Timestamp, VolumeIdx, VolumeManager};
-use esp_println::{print, println};
+use alloc::vec::Vec;
 
-pub fn sdmmc<S, CS, D, T>(spi: S, cs: CS, delay: D, ts: T) -> Result<(), Error<SdCardError>>
-    where
-        S: embedded_hal::spi::SpiDevice,
-        CS: embedded_hal::digital::OutputPin,
-        D: embedded_hal::delay::DelayNs,
-        T: TimeSource,
+use embedded_hal_bus::spi::{ExclusiveDevice, NoDelay};
+use embedded_sdmmc::{Error, Mode, SdCard, SdCardError, TimeSource, Timestamp, VolumeIdx, VolumeManager};
+use embedded_sdmmc::sdcard::DummyCsPin;
+use esp_hal::delay::Delay;
+use esp_hal::gpio::{GpioPin, Output, PushPull};
+use esp_hal::peripherals::SPI2;
+use esp_hal::spi::FullDuplexMode;
+use esp_hal::spi::master::Spi;
+use esp_println::println;
+
+pub fn sdcard_write(
+    volume_mgr: &mut VolumeManager<SdCard<ExclusiveDevice<Spi<'static, SPI2, FullDuplexMode>, DummyCsPin, NoDelay>, GpioPin<Output<PushPull>, 35>, Delay>, SdMmcClock>,
+    file_name: &str,
+    data: Vec<u8>,
+) -> Result<(), Error<SdCardError>>
 {
-    let sdcard = SdCard::new(spi, cs, delay);
-    println!("Card size is {} bytes", sdcard.num_bytes()?);
-    let mut volume_mgr = VolumeManager::new(sdcard, ts);
     let mut volume0 = volume_mgr.open_volume(VolumeIdx(0))?;
     println!("Volume 0: {:?}", volume0);
     let mut root_dir = volume0.open_root_dir()?;
-    // let mut my_file = root_dir.open_file_in_dir("MY_FILE.TXT", Mode::ReadOnly)?;
-    // while !my_file.is_eof() {
-    //     let mut buffer = [0u8; 32];
-    //     let num_read = my_file.read(&mut buffer)?;
-    //     for b in &buffer[0..num_read] {
-    //         print!("{}", *b as char);
-    //     }
-    // }
+    let mut f = root_dir.open_file_in_dir(file_name, Mode::ReadWriteCreateOrTruncate)?;
+    f.write(data.as_slice())?;
     Ok(())
+}
+
+pub fn sdcard_read(
+    volume_mgr: &mut VolumeManager<SdCard<ExclusiveDevice<Spi<'static, SPI2, FullDuplexMode>, DummyCsPin, NoDelay>, GpioPin<Output<PushPull>, 35>, Delay>, SdMmcClock>,
+    file_name: &str,
+) -> Result<Vec<u8>, Error<SdCardError>>
+{
+    let mut volume0 = volume_mgr.open_volume(VolumeIdx(0))?;
+    println!("Volume 0: {:?}", volume0);
+    let mut root_dir = volume0.open_root_dir()?;
+    let mut file = root_dir.open_file_in_dir(file_name, Mode::ReadOnly)?;
+
+    let mut buffer: Vec<u8> = Vec::new();
+    let mut read_buffer = [0u8; 32];
+
+    while !file.is_eof() {
+        let bytes_read = file.read(&mut read_buffer)?;
+        buffer.extend_from_slice(&read_buffer[..bytes_read]);
+    }
+    Ok(buffer)
 }
 
 pub struct SdMmcClock;

@@ -13,8 +13,10 @@ use display_interface_spi::SPIInterface;
 use embassy_executor::Spawner;
 use embedded_hal_bus::i2c::RefCellDevice;
 use embedded_hal_bus::spi::ExclusiveDevice;
+use embedded_sdmmc::{SdCard, VolumeManager};
 use esp_backtrace as _;
 use esp_hal as hal;
+use esp_println::println;
 use hal::gpio::NO_PIN;
 use hal::clock::ClockControl;
 use hal::embassy;
@@ -117,7 +119,7 @@ async fn main(spawner: Spawner) {
 
     // About spi device but not spi bus @see https://github.com/rust-embedded-community/embedded-sdmmc-rs/issues/126
     let sd_spi_device = ExclusiveDevice::new_no_delay(sd_spi, embedded_sdmmc::sdcard::DummyCsPin);
-    hamboo::storage::sdmmc(sd_spi_device, sd_spi_cs, delay, hamboo::storage::SdMmcClock).unwrap();
+    // hamboo::storage::sdmmc(sd_spi_device, sd_spi_cs, delay, hamboo::storage::SdMmcClock).unwrap();
 
     let touch_int = io.pins.gpio9.into_pull_up_input();
     let touch_rst = io.pins.gpio10.into_push_pull_output();
@@ -143,6 +145,9 @@ async fn main(spawner: Spawner) {
 
     let rtc = PCF8563::new(RefCellDevice::new(i2c_ref_cell));
 
+    let sdcard = SdCard::new(sd_spi_device, sd_spi_cs, delay);
+    // println!("Card size is {} bytes", sdcard.num_bytes()?);
+    let volume_mgr = VolumeManager::new(sdcard, hamboo::storage::SdMmcClock);
     // spawner.spawn(bsp::wifi_start()).ok();
-    spawner.spawn(hamboo::ui::run(display, touch, axp2101, rtc, bl_pwm_pin)).ok();
+    spawner.spawn(hamboo::ui::run(display, touch, axp2101, rtc, bl_pwm_pin, volume_mgr)).ok();
 }

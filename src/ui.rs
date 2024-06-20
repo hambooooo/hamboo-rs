@@ -1,7 +1,11 @@
+use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::rc::Rc;
 use alloc::sync::Arc;
-use core::ops::DerefMut;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::ops::{Deref, DerefMut};
+use core::str::Bytes;
 
 use axp2101::{Axp2101, I2CInterface};
 use cst816s::CST816S;
@@ -10,21 +14,24 @@ use display_interface_spi::SPIInterface;
 use embassy_time::{Duration, Timer};
 use embedded_hal::digital::OutputPin;
 use embedded_hal_bus::i2c::RefCellDevice;
-use embedded_hal_bus::spi::ExclusiveDevice;
+use embedded_hal_bus::spi::{ExclusiveDevice, NoDelay};
+use embedded_sdmmc::{SdCard, VolumeManager};
+use embedded_sdmmc::sdcard::DummyCsPin;
 use esp_hal::Blocking;
 use esp_hal::delay::Delay;
 use esp_hal::gpio::{GpioPin, Input, Output, PullUp, PushPull};
 use esp_hal::i2c::I2C;
 use esp_hal::mcpwm::operator::PwmPin;
-use esp_hal::peripherals::{I2C1, MCPWM0, SPI3};
+use esp_hal::peripherals::{I2C1, MCPWM0, SPI2, SPI3};
 use esp_hal::spi::FullDuplexMode;
 use esp_hal::spi::master::Spi;
 use esp_hal::systimer::SystemTimer;
 use esp_println::println;
+use log::log;
 use mipidsi::Display;
 use mipidsi::models::ST7789;
 use pcf8563::{DateTime as Datetime, PCF8563};
-use slint::{LogicalPosition, Weak};
+use slint::{Image, LogicalPosition, Rgb8Pixel, Rgba8Pixel, SharedPixelBuffer, Weak};
 use slint::platform::{PointerEventButton, WindowEvent};
 use slint::platform::software_renderer::{
     LineBufferProvider,
@@ -33,6 +40,7 @@ use slint::platform::software_renderer::{
     Rgb565Pixel,
 };
 use spin::Mutex;
+use crate::storage::SdMmcClock;
 
 slint::include_modules!();
 
@@ -103,6 +111,7 @@ pub async fn run(
     mut axp2101: Axp2101<I2CInterface<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>>>,
     rtc: PCF8563<RefCellDevice<'static, I2C<'static, I2C1, Blocking>>>,
     bl_pwm_pin: PwmPin<'static, GpioPin<Output<PushPull>, 18>, MCPWM0, 0, true>,
+    volume_manager: VolumeManager<SdCard<ExclusiveDevice<Spi<'static, SPI2, FullDuplexMode>, DummyCsPin, NoDelay>, GpioPin<Output<PushPull>, 35>, Delay>, SdMmcClock>,
 ) {
     let mut buffer_provider = DrawBuffer {
         display,
@@ -150,6 +159,30 @@ pub async fn run(
         };
         println!("{:#?}", new_datetime);
         rtc_cloned.lock().deref_mut().set_datetime(&new_datetime).expect("Set datetime error");
+    });
+
+    let volume_manager = Arc::new(Mutex::new(volume_manager));
+    let volume_manager_cloned = volume_manager.clone();
+    ui.global::<ImageLoader>().on_load(move |file_name| {
+        log::info!("ImageLoader load ==> {:#?}", file_name);
+
+        // let png = &include_bytes!("../ui/images/face-picture-luck.png")[..];
+        // let header = minipng::decode_png_header(png).expect("bad PNG");
+        // let mut buffer = vec![0; header.required_bytes_rgba8bpc()];
+        // let mut image = minipng::decode_png(png, &mut buffer).expect("bad PNG");
+        // println!("{}×{} image", image.width(), image.height());
+        //
+        // let serializable_image = SerializableImage::new(image.width(), image.height(), image.pixels().to_vec());
+        // let serialized_image = serializable_image.serialize();
+        let file_name = "f-luck.png";
+        //crate::storage::sdcard_write(volume_manager_cloned.lock().deref_mut(), "f-luck.png", serialized_image).expect("Write file to sdcard error");
+        let slices = crate::storage::sdcard_read(volume_manager_cloned.lock().deref_mut(), file_name).unwrap();
+        let serializable_image = SerializableImage::deserialize(slices.as_slice()).unwrap();
+        // let mut img = SharedPixelBuffer::<Rgba8Pixel>::new(header.width(), header.height());
+        // let img_slice = img.make_mut_bytes();
+        // // sdcard.
+        // img_slice.copy_from_slice(image.pixels());
+        Image::from_rgba8(serializable_image.into())
     });
 
     // 延迟亮屏过滤花屏
@@ -250,17 +283,68 @@ fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ui
             match rtc.get_datetime() {
                 Ok(date_time) => {
                     // println!("Current datetime ==> {:#?}", date_time);
-                    ui.global::<DateTime>().set_year(if date_time.year > 99 { 0 } else {date_time.year.into()});
-                    ui.global::<DateTime>().set_month(if date_time.month < 1 || date_time.month > 12  { 1 } else {date_time.month.into()});
-                    ui.global::<DateTime>().set_weekday(if date_time.weekday > 6  { 0 } else {date_time.weekday.into()});
-                    ui.global::<DateTime>().set_day(if date_time.day < 1 || date_time.day > 31  { 1 } else {date_time.day.into()});
-                    ui.global::<DateTime>().set_hours(if date_time.hours > 23  { 0 } else {date_time.hours.into()});
-                    ui.global::<DateTime>().set_minutes(if date_time.minutes > 59  { 0 } else {date_time.minutes.into()});
-                    ui.global::<DateTime>().set_seconds(if date_time.seconds > 59  { 0 } else {date_time.seconds.into()});
+                    ui.global::<DateTime>().set_year(if date_time.year > 99 { 0 } else { date_time.year.into() });
+                    ui.global::<DateTime>().set_month(if date_time.month < 1 || date_time.month > 12 { 1 } else { date_time.month.into() });
+                    ui.global::<DateTime>().set_weekday(if date_time.weekday > 6 { 0 } else { date_time.weekday.into() });
+                    ui.global::<DateTime>().set_day(if date_time.day < 1 || date_time.day > 31 { 1 } else { date_time.day.into() });
+                    ui.global::<DateTime>().set_hours(if date_time.hours > 23 { 0 } else { date_time.hours.into() });
+                    ui.global::<DateTime>().set_minutes(if date_time.minutes > 59 { 0 } else { date_time.minutes.into() });
+                    ui.global::<DateTime>().set_seconds(if date_time.seconds > 59 { 0 } else { date_time.seconds.into() });
                 }
                 Err(_) => {}
             };
         }
         None => {}
+    }
+}
+
+pub struct SerializableImage {
+    width: u32,
+    height: u32,
+    data: Vec<u8>
+}
+
+impl SerializableImage {
+
+    pub fn new(width: u32, height: u32, data: Vec<u8>) -> Self {
+        Self {
+            width,
+            height,
+            data
+        }
+    }
+
+    pub fn serialize(&self) -> Vec<u8> {
+        let width_bytes = self.width.to_be_bytes();
+        let height_bytes = self.height.to_be_bytes();
+
+        let mut serialized_data = Vec::new();
+        serialized_data.extend_from_slice(&width_bytes);
+        serialized_data.extend_from_slice(&height_bytes);
+        serialized_data.extend_from_slice(self.data.as_slice());
+
+        serialized_data
+    }
+
+    pub fn deserialize(data: &[u8]) -> Result<Self, &'static str> {
+        if data.len() < 8 {
+            return Err("Data too short to contain width and height.");
+        }
+        let width = u32::from_be_bytes(data[0..4].try_into().unwrap());
+        let height = u32::from_be_bytes(data[4..8].try_into().unwrap());
+        let image_data = &data[8..];
+        Ok(Self {
+            width,
+            height,
+            data: image_data.to_vec(),
+        })
+    }
+}
+impl Into<SharedPixelBuffer<Rgba8Pixel>> for SerializableImage {
+    fn into(self) -> SharedPixelBuffer<Rgba8Pixel> {
+        let mut img = SharedPixelBuffer::<Rgba8Pixel>::new(self.width, self.height);
+        let img_slice = img.make_mut_bytes();
+        img_slice.copy_from_slice(self.data.as_slice());
+        img
     }
 }

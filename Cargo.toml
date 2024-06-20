@@ -57,15 +57,15 @@ display-interface-spi = { version = "0.5.0" }
 embedded-graphics = { version = "0.8.1" }
 embedded-hal = { version = "1.0.0" }
 embedded-hal-bus = { version = "0.1.0" }
-embedded-sdmmc = "0.7.0"
+embedded-sdmmc = { version = "0.7.0", default-features = false }
 mipidsi = { git = "https://github.com/almindor/mipidsi", branch = "master" }
 cst816s = { git = "https://github.com/thecodechemist99/cst816s", branch = "master" }
 axp2101 = { git = "https://github.com/hambooooo/axp2101-rs", branch = "main" }
 pcf8563 = { git = "https://github.com/nebelgrau77/pcf8563-rs", branch = "embedded-hal-1" }
 
 slint = { version = "1.6.0", default-features = false, features = ["compat-1-0", "libm", "unsafe-single-threaded"] }
-
 spin = "0.9.8"
+minipng = "0.1.1"
 
 [build-dependencies]
 slint-build = "1.6.0"
