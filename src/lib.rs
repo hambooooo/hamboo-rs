@@ -3,5 +3,4 @@
 
 extern crate alloc;
 
-pub mod ui;
 pub mod storage;

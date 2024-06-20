@@ -20,28 +20,8 @@ pub fn sdcard_write(
     println!("Volume 0: {:?}", volume0);
     let mut root_dir = volume0.open_root_dir()?;
     let mut f = root_dir.open_file_in_dir(file_name, Mode::ReadWriteCreateOrTruncate)?;
-    f.write(data.as_slice())?;
+    data.chunks(10).try_for_each(|chunk| f.write(chunk))?;
     Ok(())
-}
-
-pub fn sdcard_read(
-    volume_mgr: &mut VolumeManager<SdCard<ExclusiveDevice<Spi<'static, SPI2, FullDuplexMode>, DummyCsPin, NoDelay>, GpioPin<Output<PushPull>, 35>, Delay>, SdMmcClock>,
-    file_name: &str,
-) -> Result<Vec<u8>, Error<SdCardError>>
-{
-    let mut volume0 = volume_mgr.open_volume(VolumeIdx(0))?;
-    println!("Volume 0: {:?}", volume0);
-    let mut root_dir = volume0.open_root_dir()?;
-    let mut file = root_dir.open_file_in_dir(file_name, Mode::ReadOnly)?;
-
-    let mut buffer: Vec<u8> = Vec::new();
-    let mut read_buffer = [0u8; 32];
-
-    while !file.is_eof() {
-        let bytes_read = file.read(&mut read_buffer)?;
-        buffer.extend_from_slice(&read_buffer[..bytes_read]);
-    }
-    Ok(buffer)
 }
 
 pub struct SdMmcClock;
