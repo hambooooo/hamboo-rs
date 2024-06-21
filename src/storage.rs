@@ -13,14 +13,14 @@ use esp_println::println;
 pub fn sdcard_write(
     volume_mgr: &mut VolumeManager<SdCard<ExclusiveDevice<Spi<'static, SPI2, FullDuplexMode>, DummyCsPin, NoDelay>, GpioPin<Output<PushPull>, 35>, Delay>, SdMmcClock>,
     file_name: &str,
-    data: Vec<u8>,
+    data: &[u8],
 ) -> Result<(), Error<SdCardError>>
 {
     let mut volume0 = volume_mgr.open_volume(VolumeIdx(0))?;
     println!("Volume 0: {:?}", volume0);
     let mut root_dir = volume0.open_root_dir()?;
-    let mut f = root_dir.open_file_in_dir(file_name, Mode::ReadWriteCreateOrTruncate)?;
-    data.chunks(10).try_for_each(|chunk| f.write(chunk))?;
+    let mut file = root_dir.open_file_in_dir(file_name, Mode::ReadWriteCreateOrTruncate)?;
+    file.write(data)?;
     Ok(())
 }
 

@@ -70,18 +70,10 @@ async fn main(_spawner: Spawner) {
     // println!("Card size is {} bytes", sdcard.num_bytes()?);
     let mut volume_manager = VolumeManager::new(sdcard, hamboo::storage::SdMmcClock);
 
-    let disk_name = "/sys/faces/f-picture/picture.png";
-    let image_bytes = include_bytes!("../ui/images/face-picture-hamboo.png");
-    // 获取第一部分
-    println!("First part: {:?}", &image_bytes[..10]);
-    let header = minipng::decode_png_header(image_bytes).expect("bad PNG");
-    let mut buffer = vec![0u8; header.required_bytes()];
-    let image = minipng::decode_png(image_bytes, &mut buffer).expect("bad PNG");
-    // println!("{}×{} image", image.width(), image.height());
-    //
-    // let serializable_image = SerializableImage::new(image.width(), image.height(), image.pixels().to_vec());
-    // let serialized_image = serializable_image.serialize();
-    // hamboo::storage::sdcard_write(&mut volume_manager, disk_name, serialized_image).expect("Write file to sdcard error");
+    let disk_name = "f-p.png";
+    let image_bytes = include_bytes!("../ui/images/face-picture-hamboo.simg");
+    hamboo::storage::sdcard_write(&mut volume_manager, disk_name, image_bytes).expect("Write file to sdcard error");
+    println!("successfully write image {}", disk_name);
 }
 
 
