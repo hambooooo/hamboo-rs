@@ -1,87 +1,20 @@
-#![no_std]
-#![no_main]
-#![feature(type_alias_impl_trait)]
+use std::io::Write;
 
-extern crate alloc;
-
-use alloc::vec;
-use alloc::vec::Vec;
-use core::mem::MaybeUninit;
-
-use embassy_executor::Spawner;
-use embedded_hal_bus::spi::ExclusiveDevice;
-use embedded_sdmmc::{SdCard, VolumeManager};
-use esp_backtrace as _;
-use esp_hal as hal;
-use esp_println::println;
-use hal::clock::ClockControl;
-use hal::embassy;
-use hal::gpio::IO;
-use hal::gpio::NO_PIN;
-use hal::peripherals::Peripherals;
-use hal::prelude::*;
-use hal::spi::master::Spi;
-use hal::spi::SpiMode;
-
-#[global_allocator]
-static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
-
-#[main]
-async fn main(_spawner: Spawner) {
-    esp_println::logger::init_logger(log::LevelFilter::Debug);
-
-    const HEAP_SIZE: usize = 256 * 1024;
-    static mut HEAP: MaybeUninit<[u8; HEAP_SIZE]> = MaybeUninit::uninit();
-
-    unsafe {
-        ALLOCATOR.init(HEAP.as_mut_ptr() as *mut u8, HEAP_SIZE);
-        log::info!("heap initialized");
-    }
-
-    let peripherals = Peripherals::take();
-    let system = peripherals.SYSTEM.split();
-    let clocks = ClockControl::max(system.clock_control).freeze();
-    let delay = hal::delay::Delay::new(&clocks);
-
-    embassy::init(
-        &clocks,
-        hal::timer::TimerGroup::new_async(peripherals.TIMG0, &clocks),
-    );
-    log::info!("embassy::init embassy-time-timg0");
-
-    let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
-
-    let sd_spi_sck = io.pins.gpio36;
-    let sd_spi_mosi = io.pins.gpio37;
-    let sd_spi_miso = io.pins.gpio39;
-    let sd_spi_cs = io.pins.gpio35.into_push_pull_output();
-
-    let sd_spi = Spi::new(
-        peripherals.SPI2,
-        24u32.MHz(),
-        SpiMode::Mode0,
-        &clocks,
-    ).with_pins(Some(sd_spi_sck), Some(sd_spi_mosi), Some(sd_spi_miso), NO_PIN);
-
-    // About spi device but not spi bus @see https://github.com/rust-embedded-community/embedded-sdmmc-rs/issues/126
-    let sd_spi_device = ExclusiveDevice::new_no_delay(sd_spi, embedded_sdmmc::sdcard::DummyCsPin);
-
-    let sdcard = SdCard::new(sd_spi_device, sd_spi_cs, delay);
-    // println!("Card size is {} bytes", sdcard.num_bytes()?);
-    let mut volume_manager = VolumeManager::new(sdcard, hamboo::storage::SdMmcClock);
-
-    let disk_name = "/sys/faces/f-picture/picture.png";
+fn main() -> std::io::Result<()> {
+    let root_path = std::env::current_dir().unwrap();
+    let disk_name = root_path.join("./ui/images/face-picture-hamboo.simg");
     let image_bytes = include_bytes!("../ui/images/face-picture-hamboo.png");
-    // 获取第一部分
-    println!("First part: {:?}", &image_bytes[..10]);
     let header = minipng::decode_png_header(image_bytes).expect("bad PNG");
     let mut buffer = vec![0u8; header.required_bytes()];
     let image = minipng::decode_png(image_bytes, &mut buffer).expect("bad PNG");
-    // println!("{}×{} image", image.width(), image.height());
-    //
-    // let serializable_image = SerializableImage::new(image.width(), image.height(), image.pixels().to_vec());
-    // let serialized_image = serializable_image.serialize();
-    // hamboo::storage::sdcard_write(&mut volume_manager, disk_name, serialized_image).expect("Write file to sdcard error");
+    println!("{}×{} image", image.width(), image.height());
+    let serializable_image = SerializableImage::new(image.width(), image.height(), image.pixels().to_vec());
+    let serialized_image = serializable_image.serialize();
+    println!("image path {}", disk_name.clone().to_str().unwrap());
+    let mut file = std::fs::File::create(disk_name.clone())?;
+    file.write_all(serialized_image.as_slice())?;
+    println!("Successfully write bytes to file {:?}", disk_name);
+    Ok(())
 }
 
 
