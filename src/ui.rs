@@ -308,7 +308,6 @@ impl SerializableImage {
 
 impl Into<SharedPixelBuffer<Rgba8Pixel>> for SerializableImage {
     fn into(self) -> SharedPixelBuffer<Rgba8Pixel> {
-        let mut img = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(&self.data, self.width, self.height);
-        img
+        SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(&self.data, self.width, self.height)
     }
 }
