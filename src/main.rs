@@ -5,8 +5,8 @@ use image::io::Reader as ImageReader;
 fn main() -> Result<(), Box<dyn Error>> {
     let root_dir = std::env::current_dir().unwrap();
     let images_dir = root_dir.join("./ui/images");
-    let raw_image_path = images_dir.join("./hamboo.jpg");
-    let pxs_path = images_dir.join("./0001-hamboo.pxs");
+    let raw_image_path = images_dir.join("./face-pointer-hour.png");
+    let pxs_path = images_dir.join("./0001-face-pointer-hour.pxs");
 
     let image = ImageReader::open(raw_image_path).unwrap().decode().unwrap();
 
