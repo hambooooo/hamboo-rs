@@ -71,7 +71,7 @@ async fn main(_spawner: Spawner) {
     let mut volume_manager = VolumeManager::new(sdcard, hamboo::storage::SdMmcClock);
 
     let disk_name = "0001.pxs";
-    let image_bytes = include_bytes!("../ui/images/0001-hamboo.pxs");
+    let image_bytes = include_bytes!("../ui/images/0001-face-pointer-hour.pxs");
     hamboo::storage::sdcard_write(&mut volume_manager, disk_name, image_bytes).expect("Write file to sdcard error");
     println!("successfully write image {}", disk_name);
 }
