@@ -1,4 +1,4 @@
-import { DateTime } from "./global.slint";
+import { DateTime, ImageLoader } from "./global.slint";
 import "./fonts/num-playball.ttf";
 
 
@@ -21,7 +21,7 @@ export component FacePointer inherits Rectangle {
         z: 2;
         height: 202px * zoom;
         width: 12px * zoom;
-        source: @image-url("images/face-pointer-hour.svg");
+        source: ImageLoader.load("0001.pxs"); // @image-url("images/face-pointer-hour.svg");
 //        rotation-angle: 0;
 //        animate rotation-angle {
 //             easing: ease-in;

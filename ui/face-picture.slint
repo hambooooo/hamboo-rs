@@ -1,5 +1,4 @@
 import { DateTime } from "./global.slint";
-import { ImageLoader } from "./global.slint";
 
 export component FacePicture inherits Rectangle {
     width: 240px;
@@ -8,7 +7,7 @@ export component FacePicture inherits Rectangle {
     Image {
         height: root.height;
         width: root.width;
-        source: ImageLoader.load("0001.pxs");
+        source: @image-url("./images/face-picture-luck.jpg");
         date := Text {
             x: root.width - self.width - 5px;
             y: (root.height - self.height) / 9 * zoom;
