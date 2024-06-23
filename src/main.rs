@@ -4,7 +4,7 @@
 
 extern crate alloc;
 
-use alloc::vec;
+use alloc::{format, vec};
 use alloc::vec::Vec;
 use core::mem::MaybeUninit;
 
@@ -70,10 +70,20 @@ async fn main(_spawner: Spawner) {
     // println!("Card size is {} bytes", sdcard.num_bytes()?);
     let mut volume_manager = VolumeManager::new(sdcard, hamboo::storage::SdMmcClock);
 
-    let disk_name = "0001.pxs";
-    let image_bytes = include_bytes!("../ui/images/0001-face-pointer-hour.pxs");
-    hamboo::storage::sdcard_write(&mut volume_manager, disk_name, image_bytes).expect("Write file to sdcard error");
-    println!("successfully write image {}", disk_name);
+
+    let byte_slices: Vec<&[u8]> = vec![
+        include_bytes!("../ui/images/0001-face-pointer-hour.pxs"),
+        include_bytes!("../ui/images/0002-face-pointer-minute.pxs"),
+        include_bytes!("../ui/images/0003-face-pointer-second.pxs"),
+        include_bytes!("../ui/images/0004-app-calculate.pxs"),
+    ];
+    let mut index = 0;
+    for image_bytes in byte_slices {
+        index += 1;
+        let file_name = format!("{:04}.pxs", index);
+        hamboo::storage::sdcard_write(&mut volume_manager, file_name.clone().as_str(), image_bytes).expect("Write file to sdcard error");
+        println!("successfully write image {}", file_name);
+    }
 }
 
 
