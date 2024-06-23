@@ -1,19 +1,23 @@
-use std::io::Write;
+use std::error::Error;
+use std::io::{Cursor, Write};
+use image::io::Reader as ImageReader;
 
-fn main() -> std::io::Result<()> {
-    let root_path = std::env::current_dir().unwrap();
-    let disk_name = root_path.join("./ui/images/face-picture-hamboo.simg");
-    let image_bytes = include_bytes!("../ui/images/face-picture-hamboo.png");
-    let header = minipng::decode_png_header(image_bytes).expect("bad PNG");
-    let mut buffer = vec![0u8; header.required_bytes()];
-    let image = minipng::decode_png(image_bytes, &mut buffer).expect("bad PNG");
+fn main() -> Result<(), Box<dyn Error>> {
+    let root_dir = std::env::current_dir().unwrap();
+    let images_dir = root_dir.join("./ui/images");
+    let raw_image_path = images_dir.join("./hamboo.jpg");
+    let pxs_path = images_dir.join("./0001-hamboo.pxs");
+
+    let image = ImageReader::open(raw_image_path).unwrap().decode().unwrap();
+
     println!("{}×{} image", image.width(), image.height());
-    let serializable_image = SerializableImage::new(image.width(), image.height(), image.pixels().to_vec());
+    let serializable_image = SerializableImage::new(image.width(), image.height(), image.as_bytes().to_vec());
     let serialized_image = serializable_image.serialize();
-    println!("image path {}", disk_name.clone().to_str().unwrap());
-    let mut file = std::fs::File::create(disk_name.clone())?;
-    file.write_all(serialized_image.as_slice())?;
-    println!("Successfully write bytes to file {:?}", disk_name);
+    println!("image path {}", pxs_path.clone().to_str().unwrap());
+
+    let mut file = std::fs::File::create(pxs_path.clone()).unwrap();
+    file.write_all(serialized_image.as_slice()).unwrap();
+    println!("Successfully write bytes to file {:?}", pxs_path);
     Ok(())
 }
 

@@ -11,7 +11,8 @@ keywords = ["hamboo", "Slint", "esp32", "esp32-s3", "smartwatch"]
 repository = "https://github.com/hambooooo/hamboo-rs"
 
 [dependencies]
-minipng = "0.1.1"
+image = { version = "0.24.1" }
+resvg = "0.42.0"
 
 [profile.dev]
 # Rust debug is too slow. 
