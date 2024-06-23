@@ -70,8 +70,8 @@ async fn main(_spawner: Spawner) {
     // println!("Card size is {} bytes", sdcard.num_bytes()?);
     let mut volume_manager = VolumeManager::new(sdcard, hamboo::storage::SdMmcClock);
 
-    let disk_name = "f-p.png";
-    let image_bytes = include_bytes!("../ui/images/face-picture-hamboo.simg");
+    let disk_name = "0001.pxs";
+    let image_bytes = include_bytes!("../ui/images/0001-hamboo.pxs");
     hamboo::storage::sdcard_write(&mut volume_manager, disk_name, image_bytes).expect("Write file to sdcard error");
     println!("successfully write image {}", disk_name);
 }
