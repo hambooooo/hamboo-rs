@@ -12,12 +12,7 @@ keywords = ["hamboo", "Slint", "esp32", "esp32-s3", "smartwatch"]
 repository = "https://github.com/hambooooo/hamboo-rs"
 
 [dependencies]
-embassy-net = { version = "0.4.0", features = [
-    "tcp",
-    "udp",
-    "dhcpv4",
-    "medium-ethernet",
-] }
+
 embassy-net-driver = { version = "0.2" }
 embassy-executor = { version = "0.5.0", features = [
     "integrated-timers",
@@ -65,7 +60,7 @@ pcf8563 = { git = "https://github.com/nebelgrau77/pcf8563-rs", branch = "embedde
 
 slint = { version = "1.6.0", default-features = false, features = ["compat-1-0", "libm", "unsafe-single-threaded"] }
 spin = "0.9.8"
-minipng = "0.1.1"
+zune-jpeg = { version = "0.4.11", default-features = false, features = ["neon"]}
 
 [build-dependencies]
 slint-build = "1.6.0"

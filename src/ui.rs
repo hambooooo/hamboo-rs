@@ -5,7 +5,6 @@ use alloc::sync::Arc;
 use alloc::vec;
 use alloc::vec::Vec;
 use core::ops::{Deref, DerefMut};
-use core::str::Bytes;
 
 use axp2101::{Axp2101, I2CInterface};
 use cst816s::CST816S;
@@ -31,7 +30,7 @@ use log::log;
 use mipidsi::Display;
 use mipidsi::models::ST7789;
 use pcf8563::{DateTime as Datetime, PCF8563};
-use slint::{Image, LogicalPosition, Rgb8Pixel, Rgba8Pixel, SharedPixelBuffer, Weak};
+use slint::{Image, LogicalPosition, Rgb8Pixel, SharedPixelBuffer, Weak};
 use slint::platform::{PointerEventButton, WindowEvent};
 use slint::platform::software_renderer::{
     LineBufferProvider,
@@ -40,6 +39,7 @@ use slint::platform::software_renderer::{
     Rgb565Pixel,
 };
 use spin::Mutex;
+
 use crate::storage::SdMmcClock;
 
 slint::include_modules!();
@@ -165,24 +165,22 @@ pub async fn run(
     let volume_manager_cloned = volume_manager.clone();
     ui.global::<ImageLoader>().on_load(move |file_name| {
         log::info!("ImageLoader load ==> {:#?}", file_name);
-
-        // let png = &include_bytes!("../ui/images/face-picture-luck.png")[..];
-        // let header = minipng::decode_png_header(png).expect("bad PNG");
-        // let mut buffer = vec![0; header.required_bytes_rgba8bpc()];
-        // let mut image = minipng::decode_png(png, &mut buffer).expect("bad PNG");
-        // println!("{}×{} image", image.width(), image.height());
-        //
-        // let serializable_image = SerializableImage::new(image.width(), image.height(), image.pixels().to_vec());
-        // let serialized_image = serializable_image.serialize();
-        let file_name = "f-luck.png";
-        //crate::storage::sdcard_write(volume_manager_cloned.lock().deref_mut(), "f-luck.png", serialized_image).expect("Write file to sdcard error");
-        let slices = crate::storage::sdcard_read(volume_manager_cloned.lock().deref_mut(), file_name).unwrap();
-        let serializable_image = SerializableImage::deserialize(slices.as_slice()).unwrap();
-        // let mut img = SharedPixelBuffer::<Rgba8Pixel>::new(header.width(), header.height());
-        // let img_slice = img.make_mut_bytes();
-        // // sdcard.
-        // img_slice.copy_from_slice(image.pixels());
-        Image::from_rgba8(serializable_image.into())
+        let bytes = include_bytes!("../ui/images/hamboo-half.jpg");
+        log::info!("step 1: load bytes");
+        // let slices = crate::storage::sdcard_read(volume_manager_cloned.lock().deref_mut(), file_name).unwrap();
+        let mut decoder = zune_jpeg::JpegDecoder::new(bytes);
+        log::info!("step 2: create decoder");
+        let bytes = decoder.decode().unwrap();
+        log::info!("step 3: decode with decoder");
+        let info = decoder.info().unwrap();
+        log::info!("step 4: got image info x {}, y {}, bytes {}", info.width, info.height, bytes.len());
+        let pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(
+            bytes.as_ref(),
+            info.width as u32,
+            info.height as u32,
+        );
+        log::info!("step 5: create shared_pixel_buffer");
+        Image::from_rgb8(pixel_buffer)
     });
 
     // 延迟亮屏过滤花屏
@@ -295,56 +293,5 @@ fn update_datetime(rtc: &mut PCF8563<RefCellDevice<I2C<'_, I2C1, Blocking>>>, ui
             };
         }
         None => {}
-    }
-}
-
-pub struct SerializableImage {
-    width: u32,
-    height: u32,
-    data: Vec<u8>
-}
-
-impl SerializableImage {
-
-    pub fn new(width: u32, height: u32, data: Vec<u8>) -> Self {
-        Self {
-            width,
-            height,
-            data
-        }
-    }
-
-    pub fn serialize(&self) -> Vec<u8> {
-        let width_bytes = self.width.to_be_bytes();
-        let height_bytes = self.height.to_be_bytes();
-
-        let mut serialized_data = Vec::new();
-        serialized_data.extend_from_slice(&width_bytes);
-        serialized_data.extend_from_slice(&height_bytes);
-        serialized_data.extend_from_slice(self.data.as_slice());
-
-        serialized_data
-    }
-
-    pub fn deserialize(data: &[u8]) -> Result<Self, &'static str> {
-        if data.len() < 8 {
-            return Err("Data too short to contain width and height.");
-        }
-        let width = u32::from_be_bytes(data[0..4].try_into().unwrap());
-        let height = u32::from_be_bytes(data[4..8].try_into().unwrap());
-        let image_data = &data[8..];
-        Ok(Self {
-            width,
-            height,
-            data: image_data.to_vec(),
-        })
-    }
-}
-impl Into<SharedPixelBuffer<Rgba8Pixel>> for SerializableImage {
-    fn into(self) -> SharedPixelBuffer<Rgba8Pixel> {
-        let mut img = SharedPixelBuffer::<Rgba8Pixel>::new(self.width, self.height);
-        let img_slice = img.make_mut_bytes();
-        img_slice.copy_from_slice(self.data.as_slice());
-        img
     }
 }
