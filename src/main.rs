@@ -148,6 +148,6 @@ async fn main(spawner: Spawner) {
     let sdcard = SdCard::new(sd_spi_device, sd_spi_cs, delay);
     // println!("Card size is {} bytes", sdcard.num_bytes()?);
     let volume_mgr = VolumeManager::new(sdcard, hamboo::storage::SdMmcClock);
-    // spawner.spawn(bsp::wifi_start()).ok();
+    // spawner.spawn(bsp::wifi_start()).ok();.
     spawner.spawn(hamboo::ui::run(display, touch, axp2101, rtc, bl_pwm_pin, volume_mgr)).ok();
 }
